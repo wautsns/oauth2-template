@@ -32,13 +32,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class OAuth2Context extends AbstractMap<Object, Object> {
 
     /**
-     * Create a new OAuth2 context, using {@link HashMap} as delegate.
+     * Create a new OAuth2 context, using {@link HashMap} as delegate (initial capacity: 4).
      *
      * @return a new OAuth2 context
      * @see #delegate(Map)
      */
     public static @NotNull OAuth2Context hashMap() {
-        return delegate(new HashMap<>());
+        return delegate(new HashMap<>(4));
     }
 
     /**
