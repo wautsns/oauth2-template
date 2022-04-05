@@ -1,0 +1,2 @@
+# OAuth2HttpClientFactory based on apache httpcomponents
+com.github.wautsns.oauth2template.extension.http.httpcomponents.HttpcomponentsOAuth2HttpClientFactory
