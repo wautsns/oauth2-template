@@ -16,7 +16,6 @@
 package com.github.wautsns.oauth2template.core.utility.ctx;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
@@ -95,11 +94,16 @@ public final class OAuth2Context extends AbstractMap<Object, Object> {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @Override
-    public boolean equals(@Nullable Object obj) {
-        return obj == this;
+    public boolean equals(Object o) {
+        if (this == o) {return true;}
+        if (o == null || getClass() != o.getClass()) {return false;}
+        OAuth2Context that = (OAuth2Context) o;
+        return this.delegate == that.delegate;
     }
 
     @Override
-    public native int hashCode();
+    public int hashCode() {
+        return delegate.hashCode();
+    }
 
 }
