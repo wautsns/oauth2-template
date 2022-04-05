@@ -39,7 +39,7 @@ public final class OAuth2RefreshTokenExpiredException extends OAuth2Exception {
     // ##################################################################################
 
     /** An OAuth2 data received from platform. */
-    private final @NotNull OAuth2DataReceived dataReceived;
+    private final transient @NotNull OAuth2DataReceived dataReceived;
 
     // ##################################################################################
 

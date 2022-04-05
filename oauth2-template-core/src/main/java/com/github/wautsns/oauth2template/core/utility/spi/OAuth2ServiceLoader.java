@@ -15,6 +15,8 @@
  */
 package com.github.wautsns.oauth2template.core.utility.spi;
 
+import com.github.wautsns.oauth2template.core.basic.api.factory.OAuth2ApiFactory;
+import com.github.wautsns.oauth2template.core.basic.api.factory.OAuth2ApiFactoryHub;
 import com.github.wautsns.oauth2template.core.utility.http.factory.OAuth2HttpClientFactory;
 import com.github.wautsns.oauth2template.core.utility.http.factory.OAuth2HttpClientFactoryHub;
 
@@ -57,7 +59,7 @@ import java.util.ServiceLoader;
  * <ul>
  * <li style="list-style-type:none">########## Builtin Supported Services ###############</li>
  * <li>{@link OAuth2HttpClientFactory}({@link OAuth2HttpClientFactoryHub})</li>
- * FIXME [Builtin Supported Services] to be added
+ * <li>{@link OAuth2ApiFactory}({@link OAuth2ApiFactoryHub})</li>
  * </ul>
  *
  * @param <S> the type of the service to be loaded

@@ -69,6 +69,7 @@ public final class OAuth2Url {
     private OAuth2Url(@NotNull OAuth2Url template) {
         this.urlWithoutQuery = template.urlWithoutQuery;
         this.query = template.query.copy();
+        this.anchor = template.anchor;
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

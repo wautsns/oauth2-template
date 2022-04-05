@@ -44,7 +44,7 @@ import java.time.Duration;
  */
 public final class GitHubOAuth2Token extends OAuth2Token {
 
-    /** FIXME Not tested, temporarily assumed to be 1 day. */
+    /** TODO Not tested, temporarily assumed to be 1 day. */
     private static final @NotNull Duration ACCESS_TOKEN_VALIDITY_DURATION = Duration.ofDays(1);
 
     // ##################################################################################
