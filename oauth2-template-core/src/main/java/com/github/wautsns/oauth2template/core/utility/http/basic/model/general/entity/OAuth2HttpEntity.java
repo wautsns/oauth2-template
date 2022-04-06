@@ -56,7 +56,7 @@ public abstract class OAuth2HttpEntity<S extends OAuth2HttpEntity<S>> {
      *
      * <ul>
      * <li style="list-style-type:none">########## Examples ###############</li>
-     * <li>[application/x-www-form-urlencoded]:nameA=value&nameB=valueA&nameB=valueB</li>
+     * <li>[application/x-www-form-urlencoded]:nameA=value&amp;nameB=valueA&amp;nameB=valueB</li>
      * </ul>
      *
      * @return a descriptive string

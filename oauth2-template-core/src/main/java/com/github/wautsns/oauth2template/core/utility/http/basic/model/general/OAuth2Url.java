@@ -80,7 +80,7 @@ public final class OAuth2Url {
      * <ul>
      * <li style="list-style-type:none">########## Examples ###############</li>
      * <li>https://github.com</li>
-     * <li>https://github.com?nameA=value&nameB=valueA&nameB=valueB</li>
+     * <li>https://github.com?nameA=value&amp;nameB=valueA&amp;nameB=valueB</li>
      * <li>https://github.com?name=value#anchor</li>
      * </ul>
      *

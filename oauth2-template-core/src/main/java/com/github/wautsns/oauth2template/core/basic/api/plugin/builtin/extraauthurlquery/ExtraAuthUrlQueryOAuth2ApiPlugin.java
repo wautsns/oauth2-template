@@ -54,6 +54,7 @@ public final class ExtraAuthUrlQueryOAuth2ApiPlugin extends OAuth2ApiPlugin {
      * Return the value associated with variable: identifier.
      *
      * @param context an OAuth2 context
+     * @return the value associated with variable: identifier
      */
     public static @Nullable String getVariableIdentifier(@NotNull OAuth2Context context) {
         return (String) context.get(VARIABLE_IDENTIFIER);

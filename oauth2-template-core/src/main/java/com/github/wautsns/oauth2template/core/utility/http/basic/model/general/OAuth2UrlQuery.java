@@ -66,7 +66,7 @@ public final class OAuth2UrlQuery extends OAuth2HttpMultiValueMap<OAuth2UrlQuery
      * <ul>
      * <li style="list-style-type:none">########## Examples ###############</li>
      * <li><em>(empty string)</em></li>
-     * <li>?nameA=value&nameB=valueA&nameB=valueB</li>
+     * <li>?nameA=value&amp;nameB=valueA&amp;nameB=valueB</li>
      * </ul>
      *
      * @return a query string, or empty string if there is no query item

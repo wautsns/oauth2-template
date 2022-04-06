@@ -70,6 +70,7 @@ public final class OAuth2UrlEncodedFormHttpEntity
      * <li style="list-style-type:none">########## Notes ###############</li>
      * <li>If there are multiple values associated with the name, only the first one will be
      * returned.</li>
+     * </ul>
      *
      * @param name a name
      * @return the value associated with the name, or {@code null} if not exist
