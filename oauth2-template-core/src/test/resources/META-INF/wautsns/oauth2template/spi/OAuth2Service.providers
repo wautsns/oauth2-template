@@ -1,0 +1,6 @@
+#### Test comment.
+com.github.wautsns.oauth2template.core.utility.spi.OAuth2ServiceLoaderTests$OAuth2ServiceProviderA # Test inline comment.
+com.github.wautsns.oauth2template.core.utility.spi.OAuth2ServiceLoaderTests$OAuth2ServiceProviderB
+# # Test duplicate provider class name.
+com.github.wautsns.oauth2template.core.utility.spi.OAuth2ServiceLoaderTests$OAuth2ServiceProviderA
+com.github.wautsns.oauth2template.core.utility.spi.OAuth2ServiceLoaderTests$OAuth2ServiceProviderA

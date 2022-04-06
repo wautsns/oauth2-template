@@ -15,10 +15,10 @@
  */
 package test.com.github.wautsns.oauth2template.extension.http.httpcomponents;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.github.wautsns.oauth2template.core.utility.http.basic.OAuth2HttpClient;
 import com.github.wautsns.oauth2template.core.utility.http.basic.model.general.OAuth2HttpHeaders;
@@ -30,32 +30,29 @@ import com.github.wautsns.oauth2template.core.utility.http.factory.OAuth2HttpCli
 import com.github.wautsns.oauth2template.extension.http.httpcomponents.HttpcomponentsOAuth2HttpClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
- * Test {@link HttpcomponentsOAuth2HttpClient}.
+ * Tests for {@link HttpcomponentsOAuth2HttpClient}.
  *
  * @author wautsns
  * @since {{{SINCE_PLACEHOLDER}}}
  */
-public class HttpcomponentsOAuth2HttpClientTest {
+class HttpcomponentsOAuth2HttpClientTests {
 
-    /** Http client. */
     private static OAuth2HttpClient client;
 
-    // ##################################################################################
-
-    @BeforeClass
-    public static void setup() {
+    @BeforeAll
+    static void setup() {
         client = OAuth2HttpClientFactoryHub.create();
-        assertTrue(client instanceof HttpcomponentsOAuth2HttpClient);
+        assertInstanceOf(HttpcomponentsOAuth2HttpClient.class, client);
     }
 
     // ##################################################################################
 
     @Test
-    public void testRequestHeaderRelatedMethods() throws Exception {
+    void testRequestHeaderRelatedMethods() throws Exception {
         // Initialize request.
         String url = "http://www.httpbin.org/anything";
         OAuth2HttpRequest<?> request = OAuth2HttpMethod.GET.request(url, 0);
@@ -78,7 +75,7 @@ public class HttpcomponentsOAuth2HttpClientTest {
     }
 
     @Test
-    public void testRequestGetRelatedMethods() throws Exception {
+    void testRequestGetRelatedMethods() throws Exception {
         // Initialize request.
         String url = "http://www.httpbin.org/anything";
         OAuth2HttpRequest<?> request = OAuth2HttpMethod.GET.request(url, 3);
@@ -98,7 +95,7 @@ public class HttpcomponentsOAuth2HttpClientTest {
     }
 
     @Test
-    public void testRequestPostRelatedMethods() throws Exception {
+    void testRequestPostRelatedMethods() throws Exception {
         // Initialize request.
         String url = "http://www.httpbin.org/anything";
         OAuth2HttpRequest<OAuth2UrlEncodedFormHttpEntity> request =
