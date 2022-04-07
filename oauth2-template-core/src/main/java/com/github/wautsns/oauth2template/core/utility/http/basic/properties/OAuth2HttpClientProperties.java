@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -240,6 +241,38 @@ public final class OAuth2HttpClientProperties {
         return custom;
     }
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {return true;}
+        if (obj == null || getClass() != obj.getClass()) {return false;}
+        OAuth2HttpClientProperties that = (OAuth2HttpClientProperties) obj;
+        if (!implementation.equals(that.implementation)) {return false;}
+        if (!Objects.equals(connectionTimeout, that.connectionTimeout)) {return false;}
+        if (!Objects.equals(socketTimeout, that.socketTimeout)) {return false;}
+        if (!Objects.equals(maxConcurrentRequests, that.maxConcurrentRequests)) {return false;}
+        if (!Objects.equals(maxIdleTime, that.maxIdleTime)) {return false;}
+        if (!Objects.equals(defaultKeepAliveTimeout, that.defaultKeepAliveTimeout)) {return false;}
+        if (!Objects.equals(retryTimes, that.retryTimes)) {return false;}
+        if (!Objects.equals(proxy, that.proxy)) {return false;}
+        return custom.equals(that.custom);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = implementation.hashCode();
+        result = 31 * result + Objects.hashCode(connectionTimeout);
+        result = 31 * result + Objects.hashCode(socketTimeout);
+        result = 31 * result + Objects.hashCode(maxConcurrentRequests);
+        result = 31 * result + Objects.hashCode(maxIdleTime);
+        result = 31 * result + Objects.hashCode(defaultKeepAliveTimeout);
+        result = 31 * result + Objects.hashCode(retryTimes);
+        result = 31 * result + Objects.hashCode(proxy);
+        result = 31 * result + custom.hashCode();
+        return result;
+    }
+
     // ##################################################################################
 
     /** Proxy properties based on username and password. */
@@ -290,6 +323,28 @@ public final class OAuth2HttpClientProperties {
         public @NotNull ProxyProperties setPassword(String password) {
             this.password = password;
             return this;
+        }
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {return true;}
+            if (obj == null || getClass() != obj.getClass()) {return false;}
+            ProxyProperties that = (ProxyProperties) obj;
+            if (port != that.port) {return false;}
+            if (!Objects.equals(host, that.host)) {return false;}
+            if (!Objects.equals(username, that.username)) {return false;}
+            return Objects.equals(password, that.password);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hashCode(host);
+            result = 31 * result + port;
+            result = 31 * result + Objects.hashCode(username);
+            result = 31 * result + Objects.hashCode(password);
+            return result;
         }
 
     }

@@ -94,11 +94,11 @@ public final class OAuth2Context extends AbstractMap<Object, Object> {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
-        OAuth2Context that = (OAuth2Context) o;
-        return this.delegate == that.delegate;
+    public boolean equals(Object obj) {
+        if (this == obj) {return true;}
+        if (obj == null || getClass() != obj.getClass()) {return false;}
+        OAuth2Context that = (OAuth2Context) obj;
+        return delegate == that.delegate;
     }
 
     @Override

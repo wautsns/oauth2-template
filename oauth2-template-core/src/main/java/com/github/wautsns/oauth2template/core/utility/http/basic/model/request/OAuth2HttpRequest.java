@@ -23,6 +23,8 @@ import com.github.wautsns.oauth2template.core.utility.http.basic.model.general.e
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 /**
  * OAuth2 http request.
  *
@@ -145,6 +147,28 @@ public final class OAuth2HttpRequest<E extends OAuth2HttpEntity<E>> {
     public @NotNull OAuth2HttpRequest<E> setEntity(@Nullable E entity) {
         this.entity = entity;
         return this;
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {return true;}
+        if (obj == null || getClass() != obj.getClass()) {return false;}
+        OAuth2HttpRequest<?> that = (OAuth2HttpRequest<?>) obj;
+        if (method != that.method) {return false;}
+        if (!url.equals(that.url)) {return false;}
+        if (!Objects.equals(headers, that.headers)) {return false;}
+        return Objects.equals(entity, that.entity);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = method.hashCode();
+        result = 31 * result + url.hashCode();
+        result = 31 * result + Objects.hashCode(headers);
+        result = 31 * result + Objects.hashCode(entity);
+        return result;
     }
 
 }

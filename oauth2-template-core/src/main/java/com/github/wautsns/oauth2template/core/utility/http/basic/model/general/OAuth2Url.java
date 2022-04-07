@@ -18,6 +18,8 @@ package com.github.wautsns.oauth2template.core.utility.http.basic.model.general;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 /**
  * OAuth2 URL.
  *
@@ -109,6 +111,26 @@ public final class OAuth2Url {
     public @NotNull OAuth2Url setAnchor(@Nullable String anchor) {
         this.anchor = anchor;
         return this;
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {return true;}
+        if (obj == null || getClass() != obj.getClass()) {return false;}
+        OAuth2Url that = (OAuth2Url) obj;
+        if (!urlWithoutQuery.equals(that.urlWithoutQuery)) {return false;}
+        if (!query.equals(that.query)) {return false;}
+        return Objects.equals(anchor, that.anchor);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = urlWithoutQuery.hashCode();
+        result = 31 * result + query.hashCode();
+        result = 31 * result + Objects.hashCode(anchor);
+        return result;
     }
 
 }

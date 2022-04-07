@@ -282,4 +282,19 @@ public abstract class OAuth2HttpMultiValueMap<S extends OAuth2HttpMultiValueMap<
         return storage.toString();
     }
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {return true;}
+        if (!(obj instanceof OAuth2HttpMultiValueMap)) {return false;}
+        OAuth2HttpMultiValueMap<?> that = (OAuth2HttpMultiValueMap<?>) obj;
+        return storage.equals(that.storage);
+    }
+
+    @Override
+    public int hashCode() {
+        return storage.hashCode();
+    }
+
 }

@@ -220,7 +220,22 @@ public final class OAuth2UrlEncodedFormHttpEntity
      * @see #copy()
      */
     private OAuth2UrlEncodedFormHttpEntity(@NotNull OAuth2UrlEncodedFormHttpEntity template) {
-        this.storage = new Storage(template.storage);
+        this.storage = template.storage.copy();
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {return true;}
+        if (obj == null || getClass() != obj.getClass()) {return false;}
+        OAuth2UrlEncodedFormHttpEntity that = (OAuth2UrlEncodedFormHttpEntity) obj;
+        return storage.equals(that.storage);
+    }
+
+    @Override
+    public int hashCode() {
+        return storage.hashCode();
     }
 
     // ##################################################################################
