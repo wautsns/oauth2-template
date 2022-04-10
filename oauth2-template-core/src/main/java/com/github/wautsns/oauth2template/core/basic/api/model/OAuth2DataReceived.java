@@ -94,10 +94,10 @@ public abstract class OAuth2DataReceived {
      * @param convertor a convertor for the json node associated with the name
      * @param <T> the type of value to be returned
      * @return the value associated with the name, or {@code null} if the json node is {@link
-     *         MissingNode} or {@link NullNode}
+     *         MissingNode} or {@link NullNode} or the convertor returned {@code null}
      */
     protected final <T> @Nullable T getValue(
-            @NotNull String name, @NotNull Function<JsonNode, T> convertor) {
+            @NotNull String name, @NotNull Function<@NotNull JsonNode, @Nullable T> convertor) {
         JsonNode node = rawData.path(name);
         return (node.isMissingNode() || node.isNull()) ? null : convertor.apply(node);
     }
@@ -154,7 +154,7 @@ public abstract class OAuth2DataReceived {
     @Override
     public final String toString() {
         return String.format(
-                "[%s|%s] rawData:`%s`,context:`%s`",
+                "[%s|%s] rawData:%s,context:%s",
                 getPlatform().getName(), timestamp, rawData, context
         );
     }

@@ -80,6 +80,13 @@ public final class OAuth2HttpHeaders extends OAuth2HttpMultiValueMap<OAuth2HttpH
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    @Override
+    public @NotNull String encode(@NotNull String text) {
+        return text;
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     /**
      * Construct a new instance with the given initial capacity.
      *
@@ -98,13 +105,6 @@ public final class OAuth2HttpHeaders extends OAuth2HttpMultiValueMap<OAuth2HttpH
      */
     private OAuth2HttpHeaders(@NotNull OAuth2HttpHeaders template) {
         super(template);
-    }
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    @Override
-    public @NotNull String encode(@NotNull String text) {
-        return text;
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

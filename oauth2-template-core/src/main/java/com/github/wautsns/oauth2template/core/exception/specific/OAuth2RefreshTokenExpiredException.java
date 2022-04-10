@@ -46,10 +46,13 @@ public final class OAuth2RefreshTokenExpiredException extends OAuth2Exception {
     /**
      * Construct a new instance.
      *
+     * @param message the detail message which is saved for later retrieval by the {@link
+     *         #getMessage()} method
      * @param dataReceived an OAuth2 data received from platform
      */
-    public OAuth2RefreshTokenExpiredException(@NotNull OAuth2DataReceived dataReceived) {
-        super(dataReceived.toString());
+    public OAuth2RefreshTokenExpiredException(
+            @NotNull String message, @NotNull OAuth2DataReceived dataReceived) {
+        super(message);
         this.dataReceived = dataReceived;
     }
 

@@ -118,7 +118,7 @@ public final class GitHubOAuth2ApiFactory
             } else {
                 GitHubOAuth2DataReceived data = new GitHubOAuth2DataReceived(rawData);
                 if ("Bad credentials".equals(data.getString("message"))) {
-                    throw new OAuth2AccessTokenExpiredException(data);
+                    throw new OAuth2AccessTokenExpiredException("Bad credentials", data);
                 } else {
                     throw new OAuth2Exception(data.toString());
                 }

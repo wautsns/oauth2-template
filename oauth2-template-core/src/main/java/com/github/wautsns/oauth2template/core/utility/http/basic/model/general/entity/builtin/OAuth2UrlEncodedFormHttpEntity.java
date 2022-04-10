@@ -64,6 +64,17 @@ public final class OAuth2UrlEncodedFormHttpEntity
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     /**
+     * Return whether this instance contains no mappings.
+     *
+     * @return {@code true} if it does, otherwise {@code false}
+     */
+    public boolean isEmpty() {
+        return storage.isEmpty();
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /**
      * Return the value associated with the given name.
      *
      * <ul>
