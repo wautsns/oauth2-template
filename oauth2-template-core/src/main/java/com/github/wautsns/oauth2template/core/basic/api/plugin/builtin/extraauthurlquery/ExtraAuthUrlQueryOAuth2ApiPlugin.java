@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * OAuth2Api plugin for <em>ExtraAuthUrlQuery</em>.
@@ -47,6 +48,7 @@ public final class ExtraAuthUrlQueryOAuth2ApiPlugin extends OAuth2ApiPlugin {
      */
     public static void setVariableIdentifier(
             @NotNull OAuth2Context context, @NotNull String identifier) {
+        Objects.requireNonNull(identifier);
         context.put(VARIABLE_IDENTIFIER, identifier);
     }
 

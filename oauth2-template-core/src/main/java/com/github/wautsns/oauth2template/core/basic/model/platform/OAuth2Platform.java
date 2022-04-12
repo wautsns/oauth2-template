@@ -19,6 +19,8 @@ import com.github.wautsns.oauth2template.core.utility.ctx.OAuth2Context;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 /**
  * OAuth2 platform.
  *
@@ -39,10 +41,9 @@ public final class OAuth2Platform {
      * Construct a new instance for the given platform name.
      *
      * @param name a platform name
-     * @see OAuth2PlatformHub.Manipulation#registerIfAbsent(String)
      */
-    OAuth2Platform(@NotNull String name) {
-        this.name = name;
+    public OAuth2Platform(@NotNull String name) {
+        this.name = Objects.requireNonNull(name);
         this.context = OAuth2Context.concurrentHashMap();
     }
 

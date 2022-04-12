@@ -19,6 +19,7 @@ import com.github.wautsns.oauth2template.core.basic.api.basic.OAuth2ApiBuildAuth
 import com.github.wautsns.oauth2template.core.basic.api.basic.OAuth2ApiExchTokenWithCallback;
 import com.github.wautsns.oauth2template.core.basic.api.basic.OAuth2ApiExchUserWithToken;
 import com.github.wautsns.oauth2template.core.basic.api.factory.OAuth2ApiFactory;
+import com.github.wautsns.oauth2template.core.basic.model.OAuth2PlatformApplication;
 import com.github.wautsns.oauth2template.core.basic.model.platform.OAuth2Platform;
 import com.github.wautsns.oauth2template.core.exception.OAuth2Exception;
 import com.github.wautsns.oauth2template.core.exception.specific.OAuth2AccessTokenExpiredException;
@@ -46,11 +47,24 @@ import org.jetbrains.annotations.NotNull;
  * @since {{{SINCE_PLACEHOLDER}}}
  */
 public final class GitHubOAuth2ApiFactory
-        extends OAuth2ApiFactory<GitHubOAuth2PlatformApplication> {
+        extends OAuth2ApiFactory<GitHubOAuth2PlatformApplication, GitHubOAuth2Callback, GitHubOAuth2Token, GitHubOAuth2User> {
 
     @Override
     public @NotNull OAuth2Platform getPlatform() {
         return GitHubOAuth2.PLATFORM;
+    }
+
+    @Override
+    public @NotNull OAuth2PlatformApplication initializePlatformApplication(
+            @NotNull String applicationName) {
+        return new GitHubOAuth2PlatformApplication(applicationName);
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Override
+    public @NotNull GitHubOAuth2Callback initializeCallback(@NotNull JsonNode rawData) {
+        return new GitHubOAuth2Callback(rawData);
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

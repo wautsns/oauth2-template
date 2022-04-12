@@ -20,6 +20,8 @@ import com.github.wautsns.oauth2template.core.utility.http.basic.model.general.O
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 /**
  * Abstract OAuth2 extra auth url query.
  *
@@ -57,7 +59,7 @@ public abstract class OAuth2ExtraAuthUrlQuery {
      * @param identifier an identifier (unique in the platform)
      */
     protected OAuth2ExtraAuthUrlQuery(@NotNull String identifier) {
-        this.identifier = identifier;
+        this.identifier = Objects.requireNonNull(identifier);
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

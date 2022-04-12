@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
@@ -73,6 +74,7 @@ public abstract class OAuth2HttpMultiValueMap<S extends OAuth2HttpMultiValueMap<
      * @return the value associated with the name, or {@code null} if not exist
      */
     public final @Nullable String get(@NotNull String name) {
+        Objects.requireNonNull(name);
         Object multiValue = storage.get(name);
         if (multiValue == null) {
             return null;
@@ -89,6 +91,7 @@ public abstract class OAuth2HttpMultiValueMap<S extends OAuth2HttpMultiValueMap<
      * @param action an action to be performed
      */
     public final void forEach(@NotNull BiConsumer<@NotNull String, @NotNull String> action) {
+        Objects.requireNonNull(action);
         for (Map.Entry<String, Object> entry : storage.entrySet()) {
             String name = entry.getKey();
             Object multiValue = entry.getValue();
@@ -131,8 +134,9 @@ public abstract class OAuth2HttpMultiValueMap<S extends OAuth2HttpMultiValueMap<
      * @see #add(String, String)
      */
     public final @NotNull S set(@NotNull String name, @Nullable String value) {
+        Objects.requireNonNull(name);
         if (value == null) {
-            remove(name);
+            storage.remove(name);
         } else {
             storage.put(name, value);
         }
@@ -157,8 +161,9 @@ public abstract class OAuth2HttpMultiValueMap<S extends OAuth2HttpMultiValueMap<
      * @see #encodeAndAdd(String, String)
      */
     public final @NotNull S encodeAndSet(@NotNull String name, @Nullable String text) {
+        Objects.requireNonNull(name);
         if (text == null) {
-            remove(name);
+            storage.remove(name);
         } else {
             storage.put(name, encode(text));
         }
@@ -183,6 +188,7 @@ public abstract class OAuth2HttpMultiValueMap<S extends OAuth2HttpMultiValueMap<
      * @see #set(String, String)
      */
     public final @NotNull S add(@NotNull String name, @Nullable String value) {
+        Objects.requireNonNull(name);
         if (value == null) {return (S) this;}
         Object multiValue = storage.get(name);
         if (multiValue == null) {
@@ -216,7 +222,11 @@ public abstract class OAuth2HttpMultiValueMap<S extends OAuth2HttpMultiValueMap<
      * @see #encodeAndSet(String, String)
      */
     public final @NotNull S encodeAndAdd(@NotNull String name, @Nullable String text) {
-        return (text == null) ? (S) this : add(name, encode(text));
+        Objects.requireNonNull(name);
+        if (text != null) {
+            add(name, encode(text));
+        }
+        return (S) this;
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -228,6 +238,7 @@ public abstract class OAuth2HttpMultiValueMap<S extends OAuth2HttpMultiValueMap<
      * @return self reference
      */
     public final @NotNull S remove(@NotNull String name) {
+        Objects.requireNonNull(name);
         storage.remove(name);
         return (S) this;
     }

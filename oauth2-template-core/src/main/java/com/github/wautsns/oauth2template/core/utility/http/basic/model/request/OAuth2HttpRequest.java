@@ -68,8 +68,8 @@ public final class OAuth2HttpRequest<E extends OAuth2HttpEntity<E>> {
      * @see OAuth2HttpMethod#request(String, int)
      */
     public OAuth2HttpRequest(@NotNull OAuth2HttpMethod method, @NotNull OAuth2Url url) {
-        this.method = method;
-        this.url = url;
+        this.method = Objects.requireNonNull(method);
+        this.url = Objects.requireNonNull(url);
     }
 
     /**

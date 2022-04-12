@@ -40,6 +40,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -56,6 +58,9 @@ public abstract class OAuth2Template<A extends OAuth2PlatformApplication, C exte
 
     /** Platform application. */
     private final @NotNull A platformApplication;
+
+    /** Auth callback URL query initializer. */
+    private final @NotNull Function<JsonNode, C> callbackInitialize;
 
     /** OAuth2Api: <em>BuildAuthURL</em> */
     private final @NotNull OAuth2ApiBuildAuthUrl apiBuildAuthUrl;
@@ -88,7 +93,7 @@ public abstract class OAuth2Template<A extends OAuth2PlatformApplication, C exte
      * @throws OAuth2Exception if an OAuth2 related error occurs
      */
     public final @NotNull OAuth2Url buildAuthUrl() throws OAuth2Exception {
-        return buildAuthUrl(null);
+        return apiBuildAuthUrl.execute(null);
     }
 
     /**
@@ -114,7 +119,8 @@ public abstract class OAuth2Template<A extends OAuth2PlatformApplication, C exte
      */
     public final @NotNull T exchTokenWithCallback(@NotNull JsonNode callback)
             throws OAuth2Exception {
-        return exchTokenWithCallback(initializeCallback(callback));
+        Objects.requireNonNull(callback);
+        return exchTokenWithCallback(callbackInitialize.apply(callback));
     }
 
     /**
@@ -125,6 +131,7 @@ public abstract class OAuth2Template<A extends OAuth2PlatformApplication, C exte
      * @throws OAuth2Exception if an OAuth2 related error occurs
      */
     public final @NotNull T exchTokenWithCallback(@NotNull C callback) throws OAuth2Exception {
+        Objects.requireNonNull(callback);
         return apiExchTokenWithCallback.execute(callback);
     }
 
@@ -141,14 +148,6 @@ public abstract class OAuth2Template<A extends OAuth2PlatformApplication, C exte
         return exchUserWithToken(token);
     }
 
-    /**
-     * Initialize an auth callback URL query.
-     *
-     * @param rawData a raw data received from platform
-     * @return an auth callback URL query
-     */
-    protected abstract @NotNull C initializeCallback(@NotNull JsonNode rawData);
-
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     /**
@@ -159,6 +158,7 @@ public abstract class OAuth2Template<A extends OAuth2PlatformApplication, C exte
      * @throws OAuth2Exception if an OAuth2 related error occurs
      */
     public final @NotNull U exchUserWithToken(@NotNull T token) throws OAuth2Exception {
+        Objects.requireNonNull(token);
         return apiExchUserWithToken.execute(token);
     }
 
@@ -181,6 +181,7 @@ public abstract class OAuth2Template<A extends OAuth2PlatformApplication, C exte
      * @throws OAuth2Exception if an OAuth2 related error occurs
      */
     public final @NotNull T refreshToken(@NotNull T oldToken) throws OAuth2Exception {
+        Objects.requireNonNull(oldToken);
         if (apiRefreshToken != null) {
             return apiRefreshToken.execute(oldToken);
         } else {
@@ -209,6 +210,7 @@ public abstract class OAuth2Template<A extends OAuth2PlatformApplication, C exte
      * @throws OAuth2Exception if an OAuth2 related error occurs, or failed to revoke
      */
     public final void revokeAuth(@NotNull T token) throws OAuth2Exception {
+        Objects.requireNonNull(token);
         if (apiRevokeAuth != null) {
             apiRevokeAuth.execute(token);
         } else {
@@ -262,10 +264,14 @@ public abstract class OAuth2Template<A extends OAuth2PlatformApplication, C exte
     protected OAuth2Template(
             @NotNull A platformApplication, @NotNull OAuth2HttpClient httpClient,
             @NotNull List<@NotNull OAuth2ApiPlugin> plugins) {
+        Objects.requireNonNull(platformApplication);
+        Objects.requireNonNull(httpClient);
+        Objects.requireNonNull(plugins);
         this.platformApplication = platformApplication;
         this.platformApplication.validate();
         OAuth2ApiFactory apiFactory =
                 OAuth2ApiFactoryHub.acquire(platformApplication.getPlatform().getName());
+        this.callbackInitialize = rawData -> (C) apiFactory.initializeCallback(rawData);
         OAuth2ApiBuildAuthUrl apiBuildAuthUrl =
                 apiFactory.createApiBuildAuthUrl(platformApplication);
         OAuth2ApiExchTokenWithCallback<C, T> apiExchTokenWithCallback =
@@ -279,9 +285,7 @@ public abstract class OAuth2Template<A extends OAuth2PlatformApplication, C exte
         plugins = plugins.stream()
                 .filter(plugin -> {
                     return plugin.isApplicable(
-                            platformApplication,
-                            apiRefreshToken != null,
-                            apiRevokeAuth != null
+                            platformApplication, apiRefreshToken != null, apiRevokeAuth != null
                     );
                 })
                 .collect(Collectors.toList());

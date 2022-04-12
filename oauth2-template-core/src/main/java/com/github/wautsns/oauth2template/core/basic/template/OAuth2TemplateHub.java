@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -49,6 +50,7 @@ public final class OAuth2TemplateHub {
      */
     public static @Nullable OAuth2Template<?, ?, ?, ?> find(
             @NotNull OAuth2PlatformApplication platformApplication) {
+        Objects.requireNonNull(platformApplication);
         return STORAGE.get(platformApplication);
     }
 
@@ -60,6 +62,7 @@ public final class OAuth2TemplateHub {
      */
     public static @NotNull Optional<OAuth2Template<?, ?, ?, ?>> optional(
             @NotNull OAuth2PlatformApplication platformApplication) {
+        Objects.requireNonNull(platformApplication);
         return Optional.ofNullable(STORAGE.get(platformApplication));
     }
 
@@ -71,13 +74,16 @@ public final class OAuth2TemplateHub {
      */
     public static @NotNull OAuth2Template<?, ?, ?, ?> acquire(
             @NotNull OAuth2PlatformApplication platformApplication) {
+        Objects.requireNonNull(platformApplication);
         OAuth2Template<?, ?, ?, ?> instance = STORAGE.get(platformApplication);
         if (instance != null) {
             return instance;
         } else {
             throw new IllegalArgumentException(String.format(
-                    "No OAuth2Template instance of platform application `%s` is registered.",
-                    platformApplication
+                    "No OAuth2Template instance of platform `%s` and application `%s` is" +
+                            " registered.",
+                    platformApplication.getPlatform().getName(),
+                    platformApplication.getApplication().getName()
             ));
         }
     }
@@ -125,6 +131,7 @@ public final class OAuth2TemplateHub {
          */
         public static @Nullable OAuth2Template<?, ?, ?, ?> withdraw(
                 @NotNull OAuth2PlatformApplication platformApplication) {
+            Objects.requireNonNull(platformApplication);
             return STORAGE.remove(platformApplication);
         }
 

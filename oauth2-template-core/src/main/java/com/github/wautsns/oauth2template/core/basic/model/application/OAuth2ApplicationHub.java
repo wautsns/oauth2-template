@@ -19,9 +19,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -46,6 +46,7 @@ public final class OAuth2ApplicationHub {
      * @return an instance if exists, otherwise {@code null}
      */
     public static @Nullable OAuth2Application find(@NotNull String name) {
+        Objects.requireNonNull(name);
         return STORAGE.get(name);
     }
 
@@ -56,16 +57,19 @@ public final class OAuth2ApplicationHub {
      * @return an {@code Optional} with the instance, otherwise an empty {@code Optional}
      */
     public static @NotNull Optional<OAuth2Application> optional(@NotNull String name) {
+        Objects.requireNonNull(name);
         return Optional.ofNullable(STORAGE.get(name));
     }
 
     /**
-     * Return an instance of the given application name.
+     * Return an instance of the given platform name.
      *
      * @param name an application name
-     * @return an instance if exists, otherwise {@code null}
+     * @return an instance
+     * @throws IllegalArgumentException if there is no instance available
      */
     public static @NotNull OAuth2Application acquire(@NotNull String name) {
+        Objects.requireNonNull(name);
         OAuth2Application instance = STORAGE.get(name);
         if (instance != null) {
             return instance;
@@ -97,38 +101,19 @@ public final class OAuth2ApplicationHub {
          * Return an instance of the given application name if exists, otherwise a new instance will
          * be registered and returned.
          *
+         * <ul>
+         * <li style="list-style-type:none">########## Notes ###############</li>
+         * <li>There is currently no direct method to remove registered instances, and it is
+         * <em>highly not recommended</em> to remove them by other means to avoid unpredictable
+         * risks.</li>
+         * </ul>
+         *
          * @param name an application name
          * @return an instance
          */
         public static @NotNull OAuth2Application registerIfAbsent(@NotNull String name) {
+            Objects.requireNonNull(name);
             return STORAGE.computeIfAbsent(name, OAuth2Application::new);
-        }
-
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        /**
-         * Withdraw the instance of the given application name.
-         *
-         * @param name an application name
-         * @return a withdrawn instance, or {@code null} if not exists
-         */
-        public static @Nullable OAuth2Application withdraw(@NotNull String name) {
-            return STORAGE.remove(name);
-        }
-
-        /**
-         * Withdraw all instances that satisfy the given predicate.
-         *
-         * <ul>
-         * <li style="list-style-type:none">########## Notes ###############</li>
-         * <li>Errors or runtime exceptions thrown during iteration or by the predicate are relayed
-         * to the caller.</li>
-         * </ul>
-         *
-         * @param filter a predicate which returns true for instances to be withdrawn
-         */
-        public static void withdrawIf(@NotNull Predicate<OAuth2Application> filter) {
-            STORAGE.values().removeIf(filter);
         }
 
         // ##################################################################################

@@ -19,6 +19,9 @@ import com.github.wautsns.oauth2template.core.basic.api.model.OAuth2DataReceived
 import com.github.wautsns.oauth2template.core.exception.OAuth2Exception;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * OAuth2 refresh token expired exception.
@@ -51,9 +54,9 @@ public final class OAuth2RefreshTokenExpiredException extends OAuth2Exception {
      * @param dataReceived an OAuth2 data received from platform
      */
     public OAuth2RefreshTokenExpiredException(
-            @NotNull String message, @NotNull OAuth2DataReceived dataReceived) {
+            @Nullable String message, @NotNull OAuth2DataReceived dataReceived) {
         super(message);
-        this.dataReceived = dataReceived;
+        this.dataReceived = Objects.requireNonNull(dataReceived);
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

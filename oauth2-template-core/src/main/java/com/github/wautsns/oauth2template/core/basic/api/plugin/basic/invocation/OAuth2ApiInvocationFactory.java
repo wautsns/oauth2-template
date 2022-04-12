@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -74,8 +75,9 @@ public final class OAuth2ApiInvocationFactory {
             @NotNull OAuth2PlatformApplication platformApplication,
             @NotNull OAuth2Api<?, ?> api,
             @NotNull List<@NotNull OAuth2ApiPlugin> plugins) {
-        this.platformApplication = platformApplication;
-        this.api = api;
+        this.platformApplication = Objects.requireNonNull(platformApplication);
+        this.api = Objects.requireNonNull(api);
+        Objects.requireNonNull(plugins);
         Map<OAuth2ApiInterceptor, OAuth2ApiInterceptPoint> points = new HashMap<>();
         plugins.stream()
                 .flatMap(plugin -> plugin.getInterceptors().stream())

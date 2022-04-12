@@ -15,17 +15,16 @@
  */
 package com.github.wautsns.oauth2template.core.basic.model;
 
+import com.github.wautsns.oauth2template.core.basic.api.factory.OAuth2ApiFactoryHub;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 /**
  * The hub for {@link OAuth2PlatformApplication}.
@@ -37,10 +36,8 @@ import java.util.function.Predicate;
 public final class OAuth2PlatformApplicationHub {
 
     /** Data storage. */
-    private static final @NotNull Map<@NotNull String, @NotNull Map<@NotNull String, @NotNull OAuth2PlatformApplication>> STORAGE =
-            new HashMap<>();
-    /** Read write lock. */
-    private static final @NotNull ReadWriteLock READ_WRITE_LOCK = new ReentrantReadWriteLock();
+    private static final @NotNull Map<@NotNull StorageKey, @NotNull OAuth2PlatformApplication> STORAGE =
+            new ConcurrentHashMap<>();
 
     // ##################################################################################
 
@@ -53,13 +50,8 @@ public final class OAuth2PlatformApplicationHub {
      */
     public static @Nullable OAuth2PlatformApplication find(
             @NotNull String platformName, @NotNull String applicationName) {
-        READ_WRITE_LOCK.readLock().lock();
-        try {
-            Map<String, OAuth2PlatformApplication> substorage = STORAGE.get(platformName);
-            return (substorage == null) ? null : substorage.get(applicationName);
-        } finally {
-            READ_WRITE_LOCK.readLock().unlock();
-        }
+        StorageKey key = new StorageKey(platformName, applicationName);
+        return STORAGE.get(key);
     }
 
     /**
@@ -72,7 +64,8 @@ public final class OAuth2PlatformApplicationHub {
      */
     public static @NotNull Optional<OAuth2PlatformApplication> optional(
             @NotNull String platformName, @NotNull String applicationName) {
-        return Optional.ofNullable(find(platformName, applicationName));
+        StorageKey key = new StorageKey(platformName, applicationName);
+        return Optional.ofNullable(STORAGE.get(key));
     }
 
     /**
@@ -85,44 +78,27 @@ public final class OAuth2PlatformApplicationHub {
      */
     public static @NotNull OAuth2PlatformApplication acquire(
             @NotNull String platformName, @NotNull String applicationName) {
-        READ_WRITE_LOCK.readLock().lock();
-        try {
-            Map<String, OAuth2PlatformApplication> substorage = STORAGE.get(platformName);
-            if (substorage == null) {
-                throw new IllegalArgumentException(String.format(
-                        "No OAuth2PlatformApplication instance of platform `%s` is registered.",
-                        platformName
-                ));
-            }
-            OAuth2PlatformApplication instance = substorage.get(applicationName);
-            if (instance == null) {
-                throw new IllegalArgumentException(String.format(
-                        "No OAuth2PlatformApplication instance of application `%s` is registered.",
-                        applicationName
-                ));
-            }
-            return instance;
-        } finally {
-            READ_WRITE_LOCK.readLock().unlock();
+        StorageKey key = new StorageKey(platformName, applicationName);
+        OAuth2PlatformApplication instance = STORAGE.get(key);
+        if (instance == null) {
+            throw new IllegalArgumentException(String.format(
+                    "No OAuth2PlatformApplication instance of platform `%s` and application `%s`" +
+                            " is registered.",
+                    platformName, applicationName
+            ));
         }
+        return instance;
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     /**
-     * Perform the given action for each instance registered in the hub.
+     * Return a sequential stream with all instances registered in the hub as its source.
      *
-     * @param action an action to be performed
+     * @return a sequential stream
      */
-    public static void forEach(@NotNull Consumer<@NotNull OAuth2PlatformApplication> action) {
-        READ_WRITE_LOCK.readLock().lock();
-        try {
-            for (Map<String, OAuth2PlatformApplication> substorage : STORAGE.values()) {
-                substorage.values().forEach(action);
-            }
-        } finally {
-            READ_WRITE_LOCK.readLock().unlock();
-        }
+    public static @NotNull Stream<@NotNull OAuth2PlatformApplication> stream() {
+        return STORAGE.values().stream();
     }
 
     // ##################################################################################
@@ -131,82 +107,76 @@ public final class OAuth2PlatformApplicationHub {
     public static final class Manipulation {
 
         /**
-         * Register the given instance.
+         * Return an instance of the given platform name if exists, otherwise a new instance will be
+         * registered and returned.
          *
          * <ul>
          * <li style="list-style-type:none">########## Notes ###############</li>
-         * <li>For the same platform name and application name, only the latest registered instance
-         * will take effect.</li>
+         * <li>There is currently no direct method to remove registered instances, and it is
+         * <em>highly not recommended</em> to remove them by other means to avoid unpredictable
+         * risks.</li>
          * </ul>
-         *
-         * @param instance an instance
-         * @return a previous instance, or {@code null} if not exist
-         */
-        public static @Nullable OAuth2PlatformApplication register(
-                @NotNull OAuth2PlatformApplication instance) {
-            READ_WRITE_LOCK.writeLock().lock();
-            try {
-                String platformName = instance.getPlatform().getName();
-                String applicationName = instance.getApplication().getName();
-                return STORAGE.computeIfAbsent(platformName, key -> new HashMap<>())
-                        .put(applicationName, instance);
-            } finally {
-                READ_WRITE_LOCK.writeLock().unlock();
-            }
-        }
-
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        /**
-         * Withdraw the instance of the given platform name and application name.
          *
          * @param platformName a platform name
          * @param applicationName an application name
-         * @return a withdrawn instance, or {@code null} if not exists
+         * @return an instance
          */
-        public static @Nullable OAuth2PlatformApplication withdraw(
+        public static @NotNull OAuth2PlatformApplication registerIfAbsent(
                 @NotNull String platformName, @NotNull String applicationName) {
-            READ_WRITE_LOCK.writeLock().lock();
-            try {
-                Map<String, OAuth2PlatformApplication> substorage = STORAGE.get(platformName);
-                return (substorage == null) ? null : substorage.remove(applicationName);
-            } finally {
-                READ_WRITE_LOCK.writeLock().unlock();
-            }
-        }
-
-        /**
-         * Withdraw all instances that satisfy the given predicate.
-         *
-         * <ul>
-         * <li style="list-style-type:none">########## Notes ###############</li>
-         * <li>Errors or runtime exceptions thrown during iteration or by the predicate are relayed
-         * to the caller.</li>
-         * </ul>
-         *
-         * @param filter a predicate which returns true for instances to be withdrawn
-         */
-        public static void withdrawIf(@NotNull Predicate<OAuth2PlatformApplication> filter) {
-            READ_WRITE_LOCK.writeLock().lock();
-            try {
-                Iterator<Map<String, OAuth2PlatformApplication>> iterator =
-                        STORAGE.values().iterator();
-                while (iterator.hasNext()) {
-                    Map<String, OAuth2PlatformApplication> substorage = iterator.next();
-                    substorage.values().removeIf(filter);
-                    if (substorage.isEmpty()) {
-                        iterator.remove();
-                    }
-                }
-            } finally {
-                READ_WRITE_LOCK.writeLock().unlock();
-            }
+            StorageKey key = new StorageKey(platformName, applicationName);
+            return STORAGE.computeIfAbsent(key, sk -> {
+                return OAuth2ApiFactoryHub.acquire(sk.platformName)
+                        .initializePlatformApplication(sk.applicationName);
+            });
         }
 
         // ##################################################################################
 
         /** No need to instantiate. */
         private Manipulation() {}
+
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /** Storage key. */
+    private static final class StorageKey {
+
+        /** Platform name. */
+        public final @NotNull String platformName;
+        /** Application name. */
+        public final @NotNull String applicationName;
+
+        // ##################################################################################
+
+        /**
+         * Construct a new instance.
+         *
+         * @param platformName a platform name
+         * @param applicationName an application name
+         */
+        public StorageKey(@NotNull String platformName, @NotNull String applicationName) {
+            this.platformName = Objects.requireNonNull(platformName);
+            this.applicationName = Objects.requireNonNull(applicationName);
+        }
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {return true;}
+            if (obj == null || getClass() != obj.getClass()) {return false;}
+            StorageKey that = (StorageKey) obj;
+            if (!platformName.equals(that.platformName)) {return false;}
+            return applicationName.equals(that.applicationName);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = platformName.hashCode();
+            result = 31 * result + applicationName.hashCode();
+            return result;
+        }
 
     }
 

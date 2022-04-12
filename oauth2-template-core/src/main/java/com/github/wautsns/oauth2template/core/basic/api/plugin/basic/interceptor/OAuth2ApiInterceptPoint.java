@@ -19,6 +19,8 @@ import com.github.wautsns.oauth2template.core.basic.api.basic.OAuth2Api;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 /**
  * OAuth2Api intercept point.
  *
@@ -43,7 +45,7 @@ public final class OAuth2ApiInterceptPoint {
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public OAuth2ApiInterceptPoint(@NotNull Class<? extends OAuth2Api> target, int order) {
-        this.target = (Class) target;
+        this.target = (Class) Objects.requireNonNull(target);
         this.order = order;
     }
 

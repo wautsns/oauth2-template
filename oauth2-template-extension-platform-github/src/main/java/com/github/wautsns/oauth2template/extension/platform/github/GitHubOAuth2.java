@@ -16,7 +16,6 @@
 package com.github.wautsns.oauth2template.extension.platform.github;
 
 import com.github.wautsns.oauth2template.core.basic.model.platform.OAuth2Platform;
-import com.github.wautsns.oauth2template.core.basic.model.platform.OAuth2PlatformHub;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -31,8 +30,7 @@ public final class GitHubOAuth2 {
     /** GitHub OAuth2 platform name. */
     public static final @NotNull String PLATFORM_NAME = "github";
     /** GitHub OAuth2 platform. */
-    public static final @NotNull OAuth2Platform PLATFORM =
-            OAuth2PlatformHub.Manipulation.registerIfAbsent(PLATFORM_NAME);
+    public static final @NotNull OAuth2Platform PLATFORM = new OAuth2Platform(PLATFORM_NAME);
 
     // ##################################################################################
 

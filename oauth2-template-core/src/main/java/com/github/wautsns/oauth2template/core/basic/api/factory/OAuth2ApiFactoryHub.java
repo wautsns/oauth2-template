@@ -23,8 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -49,7 +50,7 @@ public final class OAuth2ApiFactoryHub {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     /** Data storage. */
-    private static final @NotNull Map<@NotNull String, @NotNull OAuth2ApiFactory<?>> STORAGE =
+    private static final @NotNull Map<@NotNull String, @NotNull OAuth2ApiFactory<?, ?, ?, ?>> STORAGE =
             new ConcurrentHashMap<>();
 
     static {
@@ -59,7 +60,7 @@ public final class OAuth2ApiFactoryHub {
         );
         OAuth2ServiceLoader.load(OAuth2ApiFactory.class).iterator()
                 .forEachRemaining(instance -> {
-                    OAuth2ApiFactory<?> previous = Manipulation.register(instance);
+                    OAuth2ApiFactory<?, ?, ?, ?> previous = Manipulation.register(instance);
                     log.info(
                             "An OAuth2ApiFactory instance was successfully registered." +
                                     " platformName:`{}`,previous:`{}`",
@@ -78,11 +79,35 @@ public final class OAuth2ApiFactoryHub {
      * Return an instance of the given platform name.
      *
      * @param platformName a platform name
+     * @return an instance if exists, otherwise {@code null}
+     */
+    public static @Nullable OAuth2ApiFactory<?, ?, ?, ?> find(@NotNull String platformName) {
+        Objects.requireNonNull(platformName);
+        return STORAGE.get(platformName);
+    }
+
+    /**
+     * Return an {@code Optional} describing the instance of the given platform name.
+     *
+     * @param platformName a platform name
+     * @return an {@code Optional} with the instance, otherwise an empty {@code Optional}
+     */
+    public static @NotNull Optional<OAuth2ApiFactory<?, ?, ?, ?>> optional(
+            @NotNull String platformName) {
+        Objects.requireNonNull(platformName);
+        return Optional.ofNullable(STORAGE.get(platformName));
+    }
+
+    /**
+     * Return an instance of the given platform name.
+     *
+     * @param platformName a platform name
      * @return an instance
      * @throws IllegalArgumentException if there is no instance available
      */
-    public static @NotNull OAuth2ApiFactory<?> acquire(@NotNull String platformName) {
-        OAuth2ApiFactory<?> instance = STORAGE.get(platformName);
+    public static @NotNull OAuth2ApiFactory<?, ?, ?, ?> acquire(@NotNull String platformName) {
+        Objects.requireNonNull(platformName);
+        OAuth2ApiFactory<?, ?, ?, ?> instance = STORAGE.get(platformName);
         if (instance == null) {
             throw new IllegalArgumentException(String.format(
                     "No OAuth2ApiFactory instance of platform `%s` is registered.",
@@ -99,7 +124,7 @@ public final class OAuth2ApiFactoryHub {
      *
      * @return a sequential stream
      */
-    public static @NotNull Stream<@NotNull OAuth2ApiFactory<?>> stream() {
+    public static @NotNull Stream<@NotNull OAuth2ApiFactory<?, ?, ?, ?>> stream() {
         return STORAGE.values().stream();
     }
 
@@ -120,26 +145,9 @@ public final class OAuth2ApiFactoryHub {
          * @param instance an instance
          * @return a previous instance, or {@code null} if not exist
          */
-        public static @Nullable OAuth2ApiFactory<?> register(
-                @NotNull OAuth2ApiFactory<?> instance) {
+        public static @Nullable OAuth2ApiFactory<?, ?, ?, ?> register(
+                @NotNull OAuth2ApiFactory<?, ?, ?, ?> instance) {
             return STORAGE.put(instance.getPlatform().getName(), instance);
-        }
-
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        /**
-         * Withdraw all instances that satisfy the given predicate.
-         *
-         * <ul>
-         * <li style="list-style-type:none">########## Notes ###############</li>
-         * <li>Errors or runtime exceptions thrown during iteration or by the predicate are relayed
-         * to the caller.</li>
-         * </ul>
-         *
-         * @param filter a predicate which returns true for instances to be withdrawn
-         */
-        public static void withdrawIf(@NotNull Predicate<OAuth2ApiFactory<?>> filter) {
-            STORAGE.values().removeIf(filter);
         }
 
         // ##################################################################################

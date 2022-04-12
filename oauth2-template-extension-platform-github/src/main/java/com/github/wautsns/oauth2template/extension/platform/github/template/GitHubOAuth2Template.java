@@ -23,7 +23,6 @@ import com.github.wautsns.oauth2template.extension.platform.github.api.model.tok
 import com.github.wautsns.oauth2template.extension.platform.github.api.model.user.GitHubOAuth2User;
 import com.github.wautsns.oauth2template.extension.platform.github.model.GitHubOAuth2PlatformApplication;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -34,15 +33,8 @@ import java.util.List;
  * @author wautsns
  * @since {{{SINCE_PLACEHOLDER}}}
  */
-public final class GitHubOAuth2Template extends
-        OAuth2Template<GitHubOAuth2PlatformApplication, GitHubOAuth2Callback, GitHubOAuth2Token, GitHubOAuth2User> {
-
-    @Override
-    protected @NotNull GitHubOAuth2Callback initializeCallback(@NotNull JsonNode rawData) {
-        return new GitHubOAuth2Callback(rawData);
-    }
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+public final class GitHubOAuth2Template
+        extends OAuth2Template<GitHubOAuth2PlatformApplication, GitHubOAuth2Callback, GitHubOAuth2Token, GitHubOAuth2User> {
 
     /**
      * Construct a new instance.

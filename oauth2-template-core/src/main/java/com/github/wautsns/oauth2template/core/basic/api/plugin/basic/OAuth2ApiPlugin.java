@@ -21,6 +21,7 @@ import com.github.wautsns.oauth2template.core.basic.model.OAuth2PlatformApplicat
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Abstract OAuth2Api plugin.
@@ -57,7 +58,7 @@ public abstract class OAuth2ApiPlugin {
      * @param interceptors interceptors
      */
     protected OAuth2ApiPlugin(@NotNull List<@NotNull OAuth2ApiInterceptor> interceptors) {
-        this.interceptors = interceptors;
+        this.interceptors = Objects.requireNonNull(interceptors);
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

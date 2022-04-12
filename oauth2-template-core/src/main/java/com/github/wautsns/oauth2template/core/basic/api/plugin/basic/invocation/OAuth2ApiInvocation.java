@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * OAuth2Api invocation.
@@ -78,9 +79,9 @@ public final class OAuth2ApiInvocation {
             @NotNull OAuth2Api<?, ?> api,
             @NotNull Iterator<@NotNull OAuth2ApiInterceptor> interceptorIterator,
             @UnknownNullability Object input) {
-        this.platformApplication = platformApplication;
-        this.api = api;
-        this.interceptorIterator = interceptorIterator;
+        this.platformApplication = Objects.requireNonNull(platformApplication);
+        this.api = Objects.requireNonNull(api);
+        this.interceptorIterator = Objects.requireNonNull(interceptorIterator);
         this.input = input;
         this.context = OAuth2Context.hashMap();
     }

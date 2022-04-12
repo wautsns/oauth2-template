@@ -19,13 +19,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * The hub for {@link OAuth2ExtraAuthUrlQuery}.
@@ -37,10 +35,8 @@ import java.util.function.Predicate;
 public final class OAuth2ExtraAuthUrlQueryHub {
 
     /** Data storage. */
-    private static final @NotNull Map<@NotNull String, @NotNull Map<@NotNull String, @NotNull OAuth2ExtraAuthUrlQuery>> STORAGE =
+    private static final @NotNull Map<@NotNull StorageKey, @NotNull OAuth2ExtraAuthUrlQuery> STORAGE =
             new HashMap<>();
-    /** Read write lock. */
-    private static final @NotNull ReadWriteLock READ_WRITE_LOCK = new ReentrantReadWriteLock();
 
     // ##################################################################################
 
@@ -48,18 +44,13 @@ public final class OAuth2ExtraAuthUrlQueryHub {
      * Return an instance of the given platform name and identifier.
      *
      * @param platformName a platform name
-     * @param identifier an identifier
+     * @param identifier an identifier (unique in the platform)
      * @return an instance if exists, otherwise {@code null}
      */
     public static @Nullable OAuth2ExtraAuthUrlQuery find(
             @NotNull String platformName, @NotNull String identifier) {
-        READ_WRITE_LOCK.readLock().lock();
-        try {
-            Map<String, OAuth2ExtraAuthUrlQuery> substorage = STORAGE.get(platformName);
-            return (substorage == null) ? null : substorage.get(identifier);
-        } finally {
-            READ_WRITE_LOCK.readLock().unlock();
-        }
+        StorageKey key = new StorageKey(platformName, identifier);
+        return STORAGE.get(key);
     }
 
     /**
@@ -67,62 +58,46 @@ public final class OAuth2ExtraAuthUrlQueryHub {
      * identifier.
      *
      * @param platformName a platform name
-     * @param identifier an identifier
+     * @param identifier an identifier (unique in the platform)
      * @return an {@code Optional} with the instance, otherwise an empty {@code Optional}
      */
     public static @NotNull Optional<OAuth2ExtraAuthUrlQuery> optional(
             @NotNull String platformName, @NotNull String identifier) {
-        return Optional.ofNullable(find(platformName, identifier));
+        StorageKey key = new StorageKey(platformName, identifier);
+        return Optional.ofNullable(STORAGE.get(key));
     }
 
     /**
      * Return an instance of the given platform name and identifier.
      *
      * @param platformName a platform name
-     * @param identifier an identifier
+     * @param identifier an identifier (unique in the platform)
      * @return an instance
      * @throws IllegalArgumentException if there is no instance available
      */
     public static @NotNull OAuth2ExtraAuthUrlQuery acquire(
             @NotNull String platformName, @NotNull String identifier) {
-        READ_WRITE_LOCK.readLock().lock();
-        try {
-            Map<String, OAuth2ExtraAuthUrlQuery> substorage = STORAGE.get(platformName);
-            if (substorage == null) {
-                throw new IllegalArgumentException(String.format(
-                        "No OAuth2ExtraAuthUrlQuery instance of platform `%s` is registered.",
-                        platformName
-                ));
-            }
-            OAuth2ExtraAuthUrlQuery instance = substorage.get(identifier);
-            if (instance == null) {
-                throw new IllegalArgumentException(String.format(
-                        "No OAuth2ExtraAuthUrlQuery instance of identifier `%s` is registered.",
-                        identifier
-                ));
-            }
-            return instance;
-        } finally {
-            READ_WRITE_LOCK.readLock().unlock();
+        StorageKey key = new StorageKey(platformName, identifier);
+        OAuth2ExtraAuthUrlQuery instance = STORAGE.get(key);
+        if (instance == null) {
+            throw new IllegalArgumentException(String.format(
+                    "No OAuth2ExtraAuthUrlQuery instance of platform `%s` and identifier `%s`" +
+                            " is registered.",
+                    platformName, identifier
+            ));
         }
+        return instance;
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     /**
-     * Perform the given action for each instance registered in the hub.
+     * Return a sequential stream with all instances registered in the hub as its source.
      *
-     * @param action an action to be performed
+     * @return a sequential stream
      */
-    public static void forEach(@NotNull Consumer<@NotNull OAuth2ExtraAuthUrlQuery> action) {
-        READ_WRITE_LOCK.readLock().lock();
-        try {
-            for (Map<String, OAuth2ExtraAuthUrlQuery> substorage : STORAGE.values()) {
-                substorage.values().forEach(action);
-            }
-        } finally {
-            READ_WRITE_LOCK.readLock().unlock();
-        }
+    public static @NotNull Stream<@NotNull OAuth2ExtraAuthUrlQuery> stream() {
+        return STORAGE.values().stream();
     }
 
     // ##################################################################################
@@ -144,15 +119,10 @@ public final class OAuth2ExtraAuthUrlQueryHub {
          */
         public static @Nullable OAuth2ExtraAuthUrlQuery register(
                 @NotNull OAuth2ExtraAuthUrlQuery instance) {
-            READ_WRITE_LOCK.writeLock().lock();
-            try {
-                String platformName = instance.getPlatform().getName();
-                String identifier = instance.getIdentifier();
-                return STORAGE.computeIfAbsent(platformName, key -> new HashMap<>())
-                        .put(identifier, instance);
-            } finally {
-                READ_WRITE_LOCK.writeLock().unlock();
-            }
+            String platformName = instance.getPlatform().getName();
+            String identifier = instance.getIdentifier();
+            StorageKey key = new StorageKey(platformName, identifier);
+            return STORAGE.put(key, instance);
         }
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -161,18 +131,13 @@ public final class OAuth2ExtraAuthUrlQueryHub {
          * Withdraw the instance of the given platform name and identifier.
          *
          * @param platformName a platform name
-         * @param identifier an identifier
+         * @param identifier an identifier (unique in the platform)
          * @return a withdrawn instance, or {@code null} if not exists
          */
         public static @Nullable OAuth2ExtraAuthUrlQuery withdraw(
                 @NotNull String platformName, @NotNull String identifier) {
-            READ_WRITE_LOCK.writeLock().lock();
-            try {
-                Map<String, OAuth2ExtraAuthUrlQuery> substorage = STORAGE.get(platformName);
-                return (substorage == null) ? null : substorage.remove(identifier);
-            } finally {
-                READ_WRITE_LOCK.writeLock().unlock();
-            }
+            StorageKey key = new StorageKey(platformName, identifier);
+            return STORAGE.remove(key);
         }
 
         /**
@@ -187,26 +152,56 @@ public final class OAuth2ExtraAuthUrlQueryHub {
          * @param filter a predicate which returns true for instances to be withdrawn
          */
         public static void withdrawIf(@NotNull Predicate<OAuth2ExtraAuthUrlQuery> filter) {
-            READ_WRITE_LOCK.writeLock().lock();
-            try {
-                Iterator<Map<String, OAuth2ExtraAuthUrlQuery>> iterator =
-                        STORAGE.values().iterator();
-                while (iterator.hasNext()) {
-                    Map<String, OAuth2ExtraAuthUrlQuery> substorage = iterator.next();
-                    substorage.values().removeIf(filter);
-                    if (substorage.isEmpty()) {
-                        iterator.remove();
-                    }
-                }
-            } finally {
-                READ_WRITE_LOCK.writeLock().unlock();
-            }
+            STORAGE.values().removeIf(filter);
         }
 
         // ##################################################################################
 
         /** No need to instantiate. */
         private Manipulation() {}
+
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /** Storage key. */
+    private static final class StorageKey {
+
+        /** Platform name. */
+        public final @NotNull String platformName;
+        /** Identifier. */
+        public final @NotNull String identifier;
+
+        // ##################################################################################
+
+        /**
+         * Construct a new instance.
+         *
+         * @param platformName a platform name
+         * @param identifier an identifier (unique in the platform)
+         */
+        public StorageKey(@NotNull String platformName, @NotNull String identifier) {
+            this.platformName = Objects.requireNonNull(platformName);
+            this.identifier = Objects.requireNonNull(identifier);
+        }
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {return true;}
+            if (obj == null || getClass() != obj.getClass()) {return false;}
+            StorageKey that = (StorageKey) obj;
+            if (!platformName.equals(that.platformName)) {return false;}
+            return identifier.equals(that.identifier);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = platformName.hashCode();
+            result = 31 * result + identifier.hashCode();
+            return result;
+        }
 
     }
 

@@ -16,10 +16,12 @@
 package com.github.wautsns.oauth2template.core.utility.ctx;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -76,7 +78,8 @@ public final class OAuth2Context extends AbstractMap<Object, Object> {
     }
 
     @Override
-    public Object put(Object key, Object value) {
+    public @Nullable Object put(@NotNull Object key, Object value) {
+        Objects.requireNonNull(key);
         return delegate.put(key, value);
     }
 
@@ -88,7 +91,7 @@ public final class OAuth2Context extends AbstractMap<Object, Object> {
      * @param delegate a {@link Map} instance used as delegate
      */
     private OAuth2Context(@NotNull Map<Object, Object> delegate) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate);
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

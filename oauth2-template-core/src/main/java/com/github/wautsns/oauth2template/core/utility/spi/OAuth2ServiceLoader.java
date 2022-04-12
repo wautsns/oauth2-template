@@ -62,7 +62,7 @@ import java.util.ServiceLoader;
  * <li>{@link OAuth2ApiFactory}({@link OAuth2ApiFactoryHub})</li>
  * </ul>
  *
- * @param <S> the type of the service to be loaded
+ * @param <S> the type of service to be loaded
  * @author wautsns
  * @see ServiceLoader
  * @since {{{SINCE_PLACEHOLDER}}}
@@ -99,6 +99,7 @@ public final class OAuth2ServiceLoader<S> implements Iterable<S> {
      * @see #load(Class, ClassLoader)
      */
     public static <S> @NotNull OAuth2ServiceLoader<@NotNull S> load(@NotNull Class<S> service) {
+        Objects.requireNonNull(service, "Service interface cannot be null");
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         return load(service, loader);
     }
@@ -131,6 +132,7 @@ public final class OAuth2ServiceLoader<S> implements Iterable<S> {
      */
     public static <S> @NotNull OAuth2ServiceLoader<@NotNull S> loadInstalled(
             @NotNull Class<S> service) {
+        Objects.requireNonNull(service, "Service interface cannot be null");
         ClassLoader curr = ClassLoader.getSystemClassLoader();
         ClassLoader prev = null;
         while (curr != null) {

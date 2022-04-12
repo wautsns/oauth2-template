@@ -54,7 +54,7 @@ public final class GitHubOAuth2PlatformApplication extends OAuth2PlatformApplica
      * @param applicationName an application name
      */
     public GitHubOAuth2PlatformApplication(@NotNull String applicationName) {
-        super(GitHubOAuth2.PLATFORM.getName(), applicationName);
+        super(GitHubOAuth2.PLATFORM, applicationName);
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

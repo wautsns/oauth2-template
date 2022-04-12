@@ -58,7 +58,7 @@ public final class OAuth2Url {
      * @see OAuth2UrlQuery#OAuth2UrlQuery(int)
      */
     public OAuth2Url(@NotNull String urlWithoutQuery, int queryInitialCapacity) {
-        this.urlWithoutQuery = urlWithoutQuery;
+        this.urlWithoutQuery = Objects.requireNonNull(urlWithoutQuery);
         this.query = new OAuth2UrlQuery(queryInitialCapacity);
     }
 

@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.node.NullNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -98,6 +99,8 @@ public abstract class OAuth2DataReceived {
      */
     protected final <T> @Nullable T getValue(
             @NotNull String name, @NotNull Function<@NotNull JsonNode, @Nullable T> convertor) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(convertor);
         JsonNode node = rawData.path(name);
         return (node.isMissingNode() || node.isNull()) ? null : convertor.apply(node);
     }
@@ -134,9 +137,9 @@ public abstract class OAuth2DataReceived {
      */
     protected OAuth2DataReceived(
             @NotNull JsonNode rawData, long timestamp, @NotNull OAuth2Context context) {
+        this.rawData = Objects.requireNonNull(rawData);
         this.timestamp = timestamp;
-        this.rawData = rawData;
-        this.context = context;
+        this.context = Objects.requireNonNull(context);
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

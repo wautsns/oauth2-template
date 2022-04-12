@@ -18,10 +18,11 @@ package com.github.wautsns.oauth2template.core.basic.model;
 import com.github.wautsns.oauth2template.core.basic.model.application.OAuth2Application;
 import com.github.wautsns.oauth2template.core.basic.model.application.OAuth2ApplicationHub;
 import com.github.wautsns.oauth2template.core.basic.model.platform.OAuth2Platform;
-import com.github.wautsns.oauth2template.core.basic.model.platform.OAuth2PlatformHub;
 import com.github.wautsns.oauth2template.core.utility.ctx.OAuth2Context;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 /**
  * Abstract OAuth2 platform application.
@@ -52,14 +53,13 @@ public abstract class OAuth2PlatformApplication {
     /**
      * Construct a new instance for the given application name and platform name.
      *
-     * @param platformName a platform name
+     * @param platform a platform
      * @param applicationName an application name
-     * @see OAuth2PlatformHub.Manipulation#registerIfAbsent(String)
      * @see OAuth2ApplicationHub.Manipulation#registerIfAbsent(String)
      */
     protected OAuth2PlatformApplication(
-            @NotNull String platformName, @NotNull String applicationName) {
-        this.platform = OAuth2PlatformHub.Manipulation.registerIfAbsent(platformName);
+            @NotNull OAuth2Platform platform, @NotNull String applicationName) {
+        this.platform = Objects.requireNonNull(platform);
         this.application = OAuth2ApplicationHub.Manipulation.registerIfAbsent(applicationName);
         this.context = OAuth2Context.concurrentHashMap();
     }

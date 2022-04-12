@@ -19,6 +19,8 @@ import com.github.wautsns.oauth2template.core.utility.ctx.OAuth2Context;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 /**
  * OAuth2 application.
  *
@@ -42,7 +44,7 @@ public final class OAuth2Application {
      * @see OAuth2ApplicationHub.Manipulation#registerIfAbsent(String)
      */
     OAuth2Application(@NotNull String name) {
-        this.name = name;
+        this.name = Objects.requireNonNull(name);
         this.context = OAuth2Context.concurrentHashMap();
     }
 

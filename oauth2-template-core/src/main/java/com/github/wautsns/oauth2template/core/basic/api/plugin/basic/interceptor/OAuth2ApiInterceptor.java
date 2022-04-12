@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Abstract OAuth2Api interceptor.
@@ -56,7 +57,7 @@ public abstract class OAuth2ApiInterceptor {
      */
     protected OAuth2ApiInterceptor(
             @NotNull List<@NotNull OAuth2ApiInterceptPoint> interceptPoints) {
-        this.interceptPoints = interceptPoints;
+        this.interceptPoints = Objects.requireNonNull(interceptPoints);
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

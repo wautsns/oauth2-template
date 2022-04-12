@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -51,12 +52,14 @@ public final class HttpcomponentsOAuth2HttpResponse extends OAuth2HttpResponse {
 
     @Override
     public @Nullable String getHeader(@NotNull String name) {
+        Objects.requireNonNull(name);
         Header header = delegate.getFirstHeader(name);
         return (header == null) ? null : header.getValue();
     }
 
     @Override
     public @NotNull List<@NotNull String> getHeaders(@NotNull String name) {
+        Objects.requireNonNull(name);
         return Arrays.stream(delegate.getHeaders(name))
                 .map(Header::getValue)
                 .collect(Collectors.toList());
@@ -78,7 +81,7 @@ public final class HttpcomponentsOAuth2HttpResponse extends OAuth2HttpResponse {
      * @param delegate a {@link HttpResponse} instance used as delegate
      */
     public HttpcomponentsOAuth2HttpResponse(@NotNull HttpResponse delegate) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate);
     }
 
 }
