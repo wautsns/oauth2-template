@@ -15,13 +15,19 @@
  */
 package com.github.wautsns.oauth2template.core.utility.http.basic;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 import com.github.wautsns.oauth2template.core.exception.OAuth2IOException;
 import com.github.wautsns.oauth2template.core.utility.http.basic.model.general.OAuth2HttpHeaders;
 import com.github.wautsns.oauth2template.core.utility.http.basic.model.general.OAuth2HttpMethod;
 import com.github.wautsns.oauth2template.core.utility.http.basic.model.general.entity.OAuth2HttpEntity;
+import com.github.wautsns.oauth2template.core.utility.http.basic.model.general.entity.builtin.OAuth2UrlEncodedFormHttpEntity;
 import com.github.wautsns.oauth2template.core.utility.http.basic.model.request.OAuth2HttpRequest;
 import com.github.wautsns.oauth2template.core.utility.http.basic.model.response.OAuth2HttpResponse;
 import com.github.wautsns.oauth2template.core.utility.http.basic.properties.OAuth2HttpClientProperties;
@@ -31,9 +37,6 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Tests for {@link OAuth2HttpClient}.
@@ -44,101 +47,68 @@ import java.util.List;
 class OAuth2HttpClientTests {
 
     @Test
-    void execute() throws OAuth2IOException {
-        MockOAuth2HttpClient client = new MockOAuth2HttpClient();
-        OAuth2HttpRequest<?> request = OAuth2HttpMethod.GET.request("http://abc.com", 4);
-        assertNotNull(client.execute(request));
+    void execute_OAuth2HttpRequest_Normal() throws IOException, OAuth2IOException {
+        OAuth2HttpClient instance = new NormalOAuth2HttpClient();
+        OAuth2HttpRequest<?> requestA = OAuth2HttpMethod.GET.request("url", 1);
+        requestA.getUrl().getQuery().add("name", "value");
+        assertNotNull(instance.execute(requestA));
+        OAuth2HttpRequest<OAuth2UrlEncodedFormHttpEntity> requestB =
+                OAuth2HttpMethod.POST.request("url", 1);
+        requestB.getUrl().getQuery().add("name", "value");
+        requestB.setHeaders(new OAuth2HttpHeaders(1).setAcceptJson());
+        requestB.setEntity(new OAuth2UrlEncodedFormHttpEntity(1).add("name", "value"));
+        assertNotNull(instance.execute(requestB));
     }
 
     @Test
-    void illegalPropertiesImplementation() {
+    void execute_OAuth2HttpRequest_ThrowIOException() throws Exception {
+        OAuth2HttpClient instance = spy(NormalOAuth2HttpClient.class);
+        doThrow(IOException.class).when(instance).execute(any(), any(), any(), any());
+        OAuth2HttpRequest<?> request = OAuth2HttpMethod.GET.request("url", 0);
+        assertThrows(OAuth2IOException.class, () -> instance.execute(request));
+    }
+
+    @Test
+    void execute_OAuth2HttpRequest_ThrowRuntimeException() throws Exception {
+        OAuth2HttpClient instance = spy(NormalOAuth2HttpClient.class);
+        doThrow(RuntimeException.class).when(instance).execute(any(), any(), any(), any());
+        OAuth2HttpRequest<?> request = OAuth2HttpMethod.GET.request("url", 0);
+        assertThrows(RuntimeException.class, () -> instance.execute(request));
+    }
+
+    @Test
+    void OAuth2HttpClient_OAuth2HttpClientProperties_Normal() {
+        assertDoesNotThrow(() -> new NormalOAuth2HttpClient());
         OAuth2HttpClientProperties properties = new OAuth2HttpClientProperties();
-        properties.setImplementation(MockOAuth2HttpClient.class);
-        assertThrows(IllegalArgumentException.class, () -> {
-            new OAuth2HttpClient(properties) {
-                @Override
-                protected @NotNull OAuth2HttpResponse execute(
-                        @NotNull OAuth2HttpMethod method, @NotNull String url,
-                        @NotNull OAuth2HttpHeaders headers,
-                        @Nullable OAuth2HttpEntity<?> entity) throws IOException {
-                    return new MockOAuth2HttpResponse();
-                }
-            };
-        });
+        properties.setImplementation(NormalOAuth2HttpClient.class);
+        assertDoesNotThrow(() -> new NormalOAuth2HttpClient(properties));
     }
 
     @Test
-    void throwIOException() {
-        OAuth2HttpRequest<?> request = OAuth2HttpMethod.GET.request("http://abc.com", 4);
-        OAuth2HttpClient client = new OAuth2HttpClient(OAuth2HttpClientProperties.DEFAULTS) {
-            @Override
-            protected @NotNull OAuth2HttpResponse execute(
-                    @NotNull OAuth2HttpMethod method, @NotNull String url,
-                    @NotNull OAuth2HttpHeaders headers,
-                    @Nullable OAuth2HttpEntity<?> entity) throws IOException {
-                throw new IOException();
-            }
-        };
-        assertThrows(OAuth2IOException.class, () -> {
-            client.execute(request);
-        });
-    }
-
-    @Test
-    void throwRuntimeException() {
-        OAuth2HttpRequest<?> request = OAuth2HttpMethod.GET.request("http://abc.com", 4);
-        OAuth2HttpClient client = new OAuth2HttpClient(OAuth2HttpClientProperties.DEFAULTS) {
-            @Override
-            protected @NotNull OAuth2HttpResponse execute(
-                    @NotNull OAuth2HttpMethod method, @NotNull String url,
-                    @NotNull OAuth2HttpHeaders headers,
-                    @Nullable OAuth2HttpEntity<?> entity) throws IOException {
-                throw new IllegalStateException();
-            }
-        };
-        assertThrows(IllegalStateException.class, () -> {
-            client.execute(request);
-        });
+    void OAuth2HttpClient_OAuth2HttpClientProperties_IllegalImplementation() {
+        OAuth2HttpClientProperties properties = new OAuth2HttpClientProperties();
+        properties.setImplementation(mock(OAuth2HttpClient.class).getClass());
+        assertThrows(IllegalArgumentException.class, () -> new NormalOAuth2HttpClient(properties));
     }
 
     // ##################################################################################
 
-    static class MockOAuth2HttpClient extends OAuth2HttpClient {
+    static class NormalOAuth2HttpClient extends OAuth2HttpClient {
 
         @Override
         protected @NotNull OAuth2HttpResponse execute(
                 @NotNull OAuth2HttpMethod method, @NotNull String url,
                 @NotNull OAuth2HttpHeaders headers, @Nullable OAuth2HttpEntity<?> entity)
                 throws IOException {
-            return new MockOAuth2HttpResponse();
+            return mock(OAuth2HttpResponse.class);
         }
 
-        public MockOAuth2HttpClient() {
+        public NormalOAuth2HttpClient() {
             super(OAuth2HttpClientProperties.DEFAULTS);
         }
 
-    }
-
-    static class MockOAuth2HttpResponse extends OAuth2HttpResponse {
-
-        @Override
-        public int getStatusCode() {
-            return 200;
-        }
-
-        @Override
-        public @Nullable String getHeader(@NotNull String name) {
-            return null;
-        }
-
-        @Override
-        public @NotNull List<@NotNull String> getHeaders(@NotNull String name) {
-            return new ArrayList<>(0);
-        }
-
-        @Override
-        protected @Nullable InputStream getBodyInputStream() throws IOException {
-            return null;
+        public NormalOAuth2HttpClient(@NotNull OAuth2HttpClientProperties properties) {
+            super(properties);
         }
 
     }

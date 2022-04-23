@@ -16,19 +16,21 @@
 package com.github.wautsns.oauth2template.core.utility.http.basic.properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.wautsns.oauth2template.core.utility.http.basic.OAuth2HttpClient;
+import com.github.wautsns.oauth2template.core.utility.http.basic.properties.OAuth2HttpClientProperties.ProxyProperties;
 
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 
 /**
- * Tests for {@link OAuth2HttpClientProperties}
+ * Tests for {@link OAuth2HttpClientProperties}.
  *
  * @author wautsns
  * @since {{{SINCE_PLACEHOLDER}}}
@@ -36,48 +38,107 @@ import java.time.Duration;
 class OAuth2HttpClientPropertiesTests {
 
     @Test
-    void defaultValues() {
-        OAuth2HttpClientProperties properties = OAuth2HttpClientProperties.DEFAULTS;
-        assertEquals(OAuth2HttpClient.class, properties.getImplementation());
-        assertEquals(Duration.parse("PT5S"), properties.getConnectionTimeout());
-        assertEquals(Duration.parse("PT3S"), properties.getSocketTimeout());
-        assertEquals(64, properties.getMaxConcurrentRequests());
-        assertEquals(Duration.parse("PT5M"), properties.getMaxIdleTime());
-        assertEquals(Duration.parse("PT3M"), properties.getDefaultKeepAliveTimeout());
-        assertEquals(1, properties.getRetryTimes());
-        assertNull(properties.getProxy());
-        assertNotNull(properties.getCustom());
-        assertTrue(properties.getCustom().isEmpty());
+    void STATIC_FIELD__DEFAULTS_NORMAL() {
+        OAuth2HttpClientProperties instance = OAuth2HttpClientProperties.DEFAULTS;
+        assertEquals(OAuth2HttpClient.class, instance.getImplementation());
+        assertEquals(Duration.parse("PT5S"), instance.getConnectionTimeout());
+        assertEquals(Duration.parse("PT3S"), instance.getSocketTimeout());
+        assertEquals(64, instance.getMaxConcurrentRequests());
+        assertEquals(Duration.parse("PT5M"), instance.getMaxIdleTime());
+        assertEquals(Duration.parse("PT3M"), instance.getDefaultKeepAliveTimeout());
+        assertEquals(1, instance.getRetryTimes());
+        assertNull(instance.getProxy());
+        assertNotNull(instance.getCustom());
+        assertTrue(instance.getCustom().isEmpty());
     }
 
     @Test
-    void copy() {
-        OAuth2HttpClientProperties properties = new OAuth2HttpClientProperties();
-        OAuth2HttpClientProperties.ProxyProperties proxy =
-                new OAuth2HttpClientProperties.ProxyProperties();
+    void STATIC_FIELD__DEFAULTS__CUSTOM() {
+        OAuth2HttpClientProperties instance = OAuth2HttpClientProperties.DEFAULTS;
+        Object previous = instance.getCustom().setProperty("name", "value1");
+        OAuth2HttpClientProperties copy = instance.copy();
+        assertEquals("value1", copy.getCustom().getProperty("name"));
+        instance.getCustom().setProperty("name", "value2");
+        assertEquals("value2", copy.getCustom().getProperty("name"));
+        copy.getCustom().setProperty("name", "value2");
+        instance.getCustom().setProperty("name", "value3");
+        assertEquals("value2", copy.getCustom().getProperty("name"));
+        if (previous == null) {
+            instance.getCustom().remove("name");
+        } else {
+            instance.getCustom().put("name", previous);
+        }
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Test
+    void copy_NoArg_Normal() {
+        OAuth2HttpClientProperties instance = new OAuth2HttpClientProperties();
+        ProxyProperties proxy = new ProxyProperties();
         proxy.setHost("host");
-        proxy.setPort(80);
+        proxy.setPort(12345);
         proxy.setUsername("username");
         proxy.setPassword("password");
-        properties.setProxy(proxy);
-        OAuth2HttpClientProperties copy = properties.copy();
-        assertEquals(properties.getImplementation(), copy.getImplementation());
-        assertEquals(properties.getConnectionTimeout(), copy.getConnectionTimeout());
-        assertEquals(properties.getSocketTimeout(), copy.getSocketTimeout());
-        assertEquals(properties.getMaxConcurrentRequests(), copy.getMaxConcurrentRequests());
-        assertEquals(properties.getMaxIdleTime(), copy.getMaxIdleTime());
-        assertEquals(properties.getDefaultKeepAliveTimeout(), copy.getDefaultKeepAliveTimeout());
-        assertEquals(properties.getRetryTimes(), copy.getRetryTimes());
+        instance.setProxy(proxy);
+        instance.getCustom().setProperty("name", "value");
+        OAuth2HttpClientProperties copy = instance.copy();
+        assertEquals(instance.getImplementation(), copy.getImplementation());
+        assertEquals(instance.getConnectionTimeout(), copy.getConnectionTimeout());
+        assertEquals(instance.getSocketTimeout(), copy.getSocketTimeout());
+        assertEquals(instance.getMaxConcurrentRequests(), copy.getMaxConcurrentRequests());
+        assertEquals(instance.getMaxIdleTime(), copy.getMaxIdleTime());
+        assertEquals(instance.getDefaultKeepAliveTimeout(), copy.getDefaultKeepAliveTimeout());
+        assertEquals(instance.getRetryTimes(), copy.getRetryTimes());
         assertNotNull(copy.getProxy());
-        assertNotSame(properties.getProxy(), copy.getProxy());
-        OAuth2HttpClientProperties.ProxyProperties proxyCopy = copy.getProxy();
+        assertNotSame(instance.getProxy(), copy.getProxy());
+        ProxyProperties proxyCopy = copy.getProxy();
         assertEquals(proxy.getHost(), proxyCopy.getHost());
         assertEquals(proxy.getPort(), proxyCopy.getPort());
         assertEquals(proxy.getUsername(), proxyCopy.getUsername());
         assertEquals(proxy.getPassword(), proxyCopy.getPassword());
         assertNotNull(copy.getCustom());
-        assertTrue(copy.getCustom().isEmpty());
-        assertNotSame(properties.getCustom(), copy.getCustom());
+        assertNotSame(instance.getCustom(), copy.getCustom());
+        assertEquals(instance.getCustom(), copy.getCustom());
+        assertEquals("value", copy.getCustom().getProperty("name"));
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Test
+    void equals_Object_Normal() {
+        OAuth2HttpClientProperties instanceA = new OAuth2HttpClientProperties();
+        OAuth2HttpClientProperties instanceB = new OAuth2HttpClientProperties();
+        assertEquals(instanceA, instanceB);
+        instanceA.setProxy(new ProxyProperties());
+        instanceA.getProxy().setUsername("username");
+        assertNotEquals(instanceA, instanceB);
+        instanceB.setProxy(new ProxyProperties());
+        instanceB.getProxy().setUsername("username");
+        assertEquals(instanceA, instanceB);
+        instanceA.getCustom().put("name", "value");
+        assertNotEquals(instanceA, instanceB);
+        instanceB.getCustom().put("name", "value");
+        assertEquals(instanceA, instanceB);
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Test
+    void hashCode_NoArg_Normal() {
+        OAuth2HttpClientProperties instanceA = new OAuth2HttpClientProperties();
+        OAuth2HttpClientProperties instanceB = new OAuth2HttpClientProperties();
+        assertEquals(instanceA.hashCode(), instanceB.hashCode());
+        instanceA.setProxy(new ProxyProperties());
+        instanceA.getProxy().setUsername("username");
+        assertNotEquals(instanceA.hashCode(), instanceB.hashCode());
+        instanceB.setProxy(new ProxyProperties());
+        instanceB.getProxy().setUsername("username");
+        assertEquals(instanceA.hashCode(), instanceB.hashCode());
+        instanceA.getCustom().put("name", "value");
+        assertNotEquals(instanceA.hashCode(), instanceB.hashCode());
+        instanceB.getCustom().put("name", "value");
+        assertEquals(instanceA.hashCode(), instanceB.hashCode());
     }
 
 }

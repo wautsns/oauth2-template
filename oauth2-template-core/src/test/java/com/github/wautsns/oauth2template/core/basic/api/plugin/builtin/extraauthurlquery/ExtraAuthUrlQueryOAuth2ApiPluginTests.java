@@ -1,0 +1,108 @@
+/*
+ * Copyright 2022 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.github.wautsns.oauth2template.core.basic.api.plugin.builtin.extraauthurlquery;
+
+import static com.github.wautsns.oauth2template.core.basic.api.plugin.builtin.extraauthurlquery.ExtraAuthUrlQueryOAuth2ApiPlugin.getVariableIdentifier;
+import static com.github.wautsns.oauth2template.core.basic.api.plugin.builtin.extraauthurlquery.ExtraAuthUrlQueryOAuth2ApiPlugin.setVariableIdentifier;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+
+import com.github.wautsns.oauth2template.core.basic.api.plugin.basic.interceptor.OAuth2ApiInterceptor;
+import com.github.wautsns.oauth2template.core.basic.api.plugin.builtin.extraauthurlquery.interceptor.ExtraAuthUrlQueryOAuth2ApiInterceptor;
+import com.github.wautsns.oauth2template.core.basic.model.OAuth2PlatformApplication;
+import com.github.wautsns.oauth2template.core.utility.ctx.OAuth2Context;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+/**
+ * Tests for {@link ExtraAuthUrlQueryOAuth2ApiPlugin}.
+ *
+ * @author wautsns
+ * @since {{{SINCE_PLACEHOLDER}}}
+ */
+class ExtraAuthUrlQueryOAuth2ApiPluginTests {
+
+    @Test
+    void setVariableIdentifier_OAuth2Context$String_Normal() {
+        OAuth2Context context = OAuth2Context.hashMap();
+        setVariableIdentifier(context, "identifier");
+        assertEquals("identifier", getVariableIdentifier(context));
+    }
+
+    @Test
+    void setVariableIdentifier_OAuth2Context$String_NullContext() {
+        // noinspection ConstantConditions
+        assertThrows(NullPointerException.class, () -> setVariableIdentifier(null, "identifier"));
+    }
+
+    @Test
+    void setVariableIdentifier_OAuth2Context$String_NullIdentifier() {
+        OAuth2Context context = OAuth2Context.hashMap();
+        setVariableIdentifier(context, "identifier");
+        assertEquals("identifier", getVariableIdentifier(context));
+        setVariableIdentifier(context, null);
+        assertNull(getVariableIdentifier(context));
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Test
+    void getVariableIdentifier_OAuth2Context$String_Normal() {
+        OAuth2Context context = OAuth2Context.hashMap();
+        assertNull(getVariableIdentifier(context));
+        setVariableIdentifier(context, "identifier");
+        assertEquals("identifier", getVariableIdentifier(context));
+    }
+
+    @Test
+    void getVariableIdentifier_OAuth2Context$String_NullContext() {
+        // noinspection ConstantConditions
+        assertThrows(NullPointerException.class, () -> getVariableIdentifier(null));
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Test
+    void isApplicable_OAuth2PlatformApplication$boolean$boolean_Normal() {
+        ExtraAuthUrlQueryOAuth2ApiPlugin instance = new ExtraAuthUrlQueryOAuth2ApiPlugin();
+        OAuth2PlatformApplication platformApplication = mock(OAuth2PlatformApplication.class);
+        assertTrue(instance.isApplicable(platformApplication, true, true));
+    }
+
+    @Test
+    void isApplicable_OAuth2PlatformApplication$boolean$boolean_NullPlatformApplication() {
+        ExtraAuthUrlQueryOAuth2ApiPlugin instance = new ExtraAuthUrlQueryOAuth2ApiPlugin();
+        // noinspection ConstantConditions,ResultOfMethodCallIgnored
+        assertThrows(NullPointerException.class, () -> instance.isApplicable(null, true, true));
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Test
+    void ExtraAuthUrlQueryOAuth2ApiPlugin_NoArg_Normal() {
+        ExtraAuthUrlQueryOAuth2ApiPlugin instance = new ExtraAuthUrlQueryOAuth2ApiPlugin();
+        List<OAuth2ApiInterceptor> interceptors = instance.getInterceptors();
+        assertEquals(1, interceptors.size());
+        assertInstanceOf(ExtraAuthUrlQueryOAuth2ApiInterceptor.class, interceptors.get(0));
+    }
+
+}

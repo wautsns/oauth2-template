@@ -15,15 +15,23 @@
  */
 package com.github.wautsns.oauth2template.core.utility.spi;
 
+import static com.github.wautsns.oauth2template.core.utility.spi.OAuth2ServiceLoader.load;
+import static com.github.wautsns.oauth2template.core.utility.spi.OAuth2ServiceLoader.loadInstalled;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ServiceConfigurationError;
 
 /**
  * Tests for {@link OAuth2ServiceLoader}.
@@ -34,47 +42,121 @@ import java.util.Iterator;
 class OAuth2ServiceLoaderTests {
 
     @Test
-    void load() {
-        OAuth2ServiceLoader<OAuth2Service> serviceLoader =
-                OAuth2ServiceLoader.load(OAuth2Service.class);
+    void load_Class_Normal() {
+        Iterator<OAuth2Service> iterator = load(OAuth2Service.class).iterator();
+        assertTrue(iterator.hasNext());
+        assertInstanceOf(OAuth2ServiceProviderA.class, iterator.next());
+        assertTrue(iterator.hasNext());
+        assertInstanceOf(OAuth2ServiceProviderB.class, iterator.next());
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void load_Class_NoConfigurationFile() {
+        assertFalse(load(String.class).iterator().hasNext());
+    }
+
+    @Test
+    void load_Class_NullService() {
+        // noinspection ConstantConditions
+        assertThrows(NullPointerException.class, () -> load(null));
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Test
+    void load_Class$ClassLoader_Normal() {
+        Iterator<OAuth2Service> iterator = load(OAuth2Service.class).iterator();
+        assertTrue(iterator.hasNext());
+        assertInstanceOf(OAuth2ServiceProviderA.class, iterator.next());
+        assertTrue(iterator.hasNext());
+        assertInstanceOf(OAuth2ServiceProviderB.class, iterator.next());
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void load_Class$ClassLoader_NullService() {
+        ClassLoader loader = getClass().getClassLoader();
+        // noinspection ConstantConditions
+        assertThrows(NullPointerException.class, () -> load(null, loader));
+    }
+
+    @Test
+    void load_Class$ClassLoader_NullClassLoader() {
+        Iterator<Date> iterator = load(Date.class, null).iterator();
+        assertTrue(iterator.hasNext());
+        assertInstanceOf(Date.class, iterator.next());
+        assertFalse(iterator.hasNext());
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Test
+    void loadInstalled_Class_Normal() {
+        assertFalse(loadInstalled(Date.class).iterator().hasNext());
+    }
+
+    @Test
+    void loadInstalled_Class_NullService() {
+        // noinspection ConstantConditions
+        assertThrows(NullPointerException.class, () -> loadInstalled(null));
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Test
+    void reload_NoArg_Normal() {
+        OAuth2ServiceLoader<OAuth2Service> instance = load(OAuth2Service.class);
+        OAuth2Service providerA1 = instance.iterator().next();
+        assertInstanceOf(OAuth2ServiceProviderA.class, providerA1);
+        instance.reload();
+        Iterator<OAuth2Service> iteratorB = instance.iterator();
+        OAuth2Service providerB1 = iteratorB.next();
+        assertInstanceOf(OAuth2ServiceProviderA.class, providerB1);
+        assertNotSame(providerA1, providerB1);
+        OAuth2Service providerB2 = iteratorB.next();
+        assertInstanceOf(OAuth2ServiceProviderB.class, providerB2);
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Test
+    void iterator_NoArg_Normal() {
+        OAuth2ServiceLoader<OAuth2Service> instance = load(OAuth2Service.class);
         Iterator<OAuth2Service> iterator;
         for (int i = 0; i < 2; i++) {
-            iterator = serviceLoader.iterator();
+            iterator = instance.iterator();
             assertTrue(iterator.hasNext());
-            assertInstanceOf(OAuth2ServiceProviderA.class, iterator.next());
+            assertNotNull(iterator.next());
             assertTrue(iterator.hasNext());
-            assertInstanceOf(OAuth2ServiceProviderB.class, iterator.next());
+            assertNotNull(iterator.next());
             assertFalse(iterator.hasNext());
         }
     }
 
     @Test
-    void loadInstalled() {
-        OAuth2ServiceLoader<OAuth2Service> serviceLoader =
-                OAuth2ServiceLoader.loadInstalled(OAuth2Service.class);
-        assertFalse(serviceLoader.iterator().hasNext());
+    void iterator_NoArg_ConfigurationFormatError() {
+        List<Class<?>> serviceList = Arrays.asList(
+                OAuth2ServiceIllegalConfigurationSyntax.class,
+                OAuth2ServiceIllegalProviderClassNameStart.class,
+                OAuth2ServiceIllegalProviderClassNamePart.class,
+                OAuth2ServiceProviderCouldNotBeInstantiated.class,
+                OAuth2ServiceProviderNotASubtype.class,
+                OAuth2ServiceProviderNotFound.class
+        );
+        for (Class<?> service : serviceList) {
+            assertThrows(ServiceConfigurationError.class, load(service).iterator()::next);
+        }
     }
 
-    @Test
-    void reload() {
-        OAuth2ServiceLoader<OAuth2Service> serviceLoader =
-                OAuth2ServiceLoader.load(OAuth2Service.class);
-        OAuth2Service providerA1 = serviceLoader.iterator().next();
-        assertInstanceOf(OAuth2ServiceProviderA.class, providerA1);
-        serviceLoader.reload();
-        OAuth2Service providerA2 = serviceLoader.iterator().next();
-        assertInstanceOf(OAuth2ServiceProviderA.class, providerA1);
-        assertNotSame(providerA1, providerA2);
-    }
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @Test
-    void toStringA() {
-        OAuth2ServiceLoader<OAuth2Service> serviceLoader =
-                OAuth2ServiceLoader.load(OAuth2Service.class);
+    void toString_NoArg_Normal() {
         assertEquals(
                 "OAuth2ServiceLoader[com.github.wautsns.oauth2template.core.utility.spi" +
                         ".OAuth2ServiceLoaderTests$OAuth2Service]",
-                serviceLoader.toString()
+                load(OAuth2Service.class).toString()
         );
     }
 
@@ -85,5 +167,21 @@ class OAuth2ServiceLoaderTests {
     static class OAuth2ServiceProviderA extends OAuth2Service {}
 
     static class OAuth2ServiceProviderB extends OAuth2Service {}
+
+    static class OAuth2ServiceIllegalConfigurationSyntax {}
+
+    static class OAuth2ServiceIllegalProviderClassNameStart {}
+
+    static class OAuth2ServiceIllegalProviderClassNamePart {}
+
+    static class OAuth2ServiceProviderNotFound {}
+
+    static class OAuth2ServiceProviderNotASubtype {}
+
+    static class OAuth2ServiceProviderCouldNotBeInstantiated {
+
+        public OAuth2ServiceProviderCouldNotBeInstantiated(String ignored) {}
+
+    }
 
 }

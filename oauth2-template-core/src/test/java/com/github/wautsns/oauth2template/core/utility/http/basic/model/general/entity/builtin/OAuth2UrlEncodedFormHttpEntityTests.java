@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.wautsns.oauth2template.core.utility.http.utility;
+package com.github.wautsns.oauth2template.core.utility.http.basic.model.general.entity.builtin;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -23,20 +23,46 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link OAuth2HttpMultiValueMap}.
+ * Tests for {@link OAuth2UrlEncodedFormHttpEntity}.
  *
  * @author wautsns
  * @since {{{SINCE_PLACEHOLDER}}}
  */
-class OAuth2HttpMultiValueMapTests {
+class OAuth2UrlEncodedFormHttpEntityTests {
+
+    @Test
+    void getContentType_NoArg_Normal() {
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
+        assertEquals("application/x-www-form-urlencoded", instance.getContentType());
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Test
+    void getBodyString_NoArg_Normal() {
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
+        assertEquals("", instance.getBodyString());
+        instance.add("nameA", "valueA1");
+        assertEquals("nameA=valueA1", instance.getBodyString());
+        instance.add("nameA", "valueA2");
+        assertEquals("nameA=valueA1&nameA=valueA2", instance.getBodyString());
+        instance.add("nameB", "valueB1");
+        String actual = instance.getBodyString();
+        if (actual.indexOf("nameA") < actual.indexOf("nameB")) {
+            assertEquals("nameA=valueA1&nameA=valueA2&nameB=valueB1", actual);
+        } else {
+            assertEquals("nameB=valueB1&nameA=valueA1&nameA=valueA2", actual);
+        }
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @Test
     void isEmpty_NoArg_Normal() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         assertTrue(instance.isEmpty());
         instance.add("name", "value");
         assertFalse(instance.isEmpty());
@@ -46,7 +72,7 @@ class OAuth2HttpMultiValueMapTests {
 
     @Test
     void get_String_Normal() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         assertNull(instance.get("name"));
         instance.add("name", "value");
         assertEquals("value", instance.get("name"));
@@ -54,7 +80,7 @@ class OAuth2HttpMultiValueMapTests {
 
     @Test
     void get_String_NullName() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         // noinspection ConstantConditions
         assertThrows(NullPointerException.class, () -> instance.get(null));
     }
@@ -63,19 +89,19 @@ class OAuth2HttpMultiValueMapTests {
 
     @Test
     void forEach_BiConsumer_Normal() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         instance.set("nameA", "valueA1");
         instance.set("nameA", "valueA2");
         instance.add("nameB", "valueB1");
         instance.add("nameB", "valueB2");
-        NormalOAuth2HttpMultiValueMap reference = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity reference = new OAuth2UrlEncodedFormHttpEntity(4);
         instance.forEach(reference::add);
         assertEquals(instance, reference);
     }
 
     @Test
     void forEach_BiConsumer_NullAction() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         // noinspection ConstantConditions
         assertThrows(NullPointerException.class, () -> instance.forEach(null));
     }
@@ -84,7 +110,7 @@ class OAuth2HttpMultiValueMapTests {
 
     @Test
     void set_String$String_Normal() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         instance.set("name", "value1");
         assertEquals("value1", instance.get("name"));
         instance.set("name", "value2");
@@ -95,7 +121,7 @@ class OAuth2HttpMultiValueMapTests {
 
     @Test
     void set_String$String_NullName() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         // noinspection ConstantConditions
         assertThrows(NullPointerException.class, () -> instance.set(null, ""));
     }
@@ -104,18 +130,18 @@ class OAuth2HttpMultiValueMapTests {
 
     @Test
     void encodeAndSet_String$String_Normal() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
-        instance.encodeAndSet("name", "value1");
-        assertEquals("value1___", instance.get("name"));
-        instance.encodeAndSet("name", "value2");
-        assertEquals("value2___", instance.get("name"));
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
+        instance.encodeAndSet("name", "value1%");
+        assertEquals("value1%25", instance.get("name"));
+        instance.encodeAndSet("name", "value2%");
+        assertEquals("value2%25", instance.get("name"));
         instance.encodeAndSet("name", null);
         assertNull(instance.get("name"));
     }
 
     @Test
     void encodeAndSet_String$String_NullName() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         // noinspection ConstantConditions
         assertThrows(NullPointerException.class, () -> instance.encodeAndSet(null, ""));
     }
@@ -124,7 +150,7 @@ class OAuth2HttpMultiValueMapTests {
 
     @Test
     void add_String$String_Normal() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         instance.add("name", "value1");
         assertEquals("value1", instance.get("name"));
         instance.add("name", "value2");
@@ -135,7 +161,7 @@ class OAuth2HttpMultiValueMapTests {
 
     @Test
     void add_String$String_NullName() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         // noinspection ConstantConditions
         assertThrows(NullPointerException.class, () -> instance.add(null, ""));
     }
@@ -144,18 +170,18 @@ class OAuth2HttpMultiValueMapTests {
 
     @Test
     void encodeAndAdd_String$String_Normal() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
-        instance.encodeAndAdd("name", "value1");
-        assertEquals("value1___", instance.get("name"));
-        instance.encodeAndAdd("name", "value2");
-        assertEquals("value1___", instance.get("name"));
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
+        instance.encodeAndAdd("name", "value1%");
+        assertEquals("value1%25", instance.get("name"));
+        instance.encodeAndAdd("name", "value2%");
+        assertEquals("value1%25", instance.get("name"));
         instance.encodeAndAdd("name", null);
-        assertEquals("value1___", instance.get("name"));
+        assertEquals("value1%25", instance.get("name"));
     }
 
     @Test
     void encodeAndAdd_String$String_NullName() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         // noinspection ConstantConditions
         assertThrows(NullPointerException.class, () -> instance.encodeAndAdd(null, ""));
     }
@@ -164,7 +190,7 @@ class OAuth2HttpMultiValueMapTests {
 
     @Test
     void remove_String_Normal() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         instance.remove("name");
         instance.add("name", "value");
         instance.remove("name");
@@ -173,7 +199,7 @@ class OAuth2HttpMultiValueMapTests {
 
     @Test
     void remove_String_NullName() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         // noinspection ConstantConditions
         assertThrows(NullPointerException.class, () -> instance.remove(null));
     }
@@ -182,11 +208,11 @@ class OAuth2HttpMultiValueMapTests {
 
     @Test
     void OAuth2HttpMultiValueMap_OAuth2HttpMultiValueMap_Copy() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         instance.set("nameA", "valueA1");
         instance.set("nameA", "valueA2");
         instance.add("nameB", "valueB1");
-        NormalOAuth2HttpMultiValueMap copy = instance.copy();
+        OAuth2UrlEncodedFormHttpEntity copy = instance.copy();
         assertNotSame(instance, copy);
         assertEquals(instance, copy);
         instance.add("nameB", "valueB2");
@@ -196,27 +222,22 @@ class OAuth2HttpMultiValueMapTests {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @Test
-    void toString_NoArg_Normal() {
-        NormalOAuth2HttpMultiValueMap instance = new NormalOAuth2HttpMultiValueMap();
+    void copy_NoArg_Normal() {
+        OAuth2UrlEncodedFormHttpEntity instance = new OAuth2UrlEncodedFormHttpEntity(4);
         instance.add("nameA", "valueA1");
-        assertEquals("{nameA=valueA1}", instance.toString());
         instance.add("nameA", "valueA2");
-        assertEquals("{nameA=[valueA1, valueA2]}", instance.toString());
-        instance.add("nameB", "valueB1");
-        String actual = instance.toString();
-        if (actual.indexOf("nameA") < actual.indexOf("nameB")) {
-            assertEquals("{nameA=[valueA1, valueA2], nameB=valueB1}", actual);
-        } else {
-            assertEquals("{nameB=valueB1, nameA=[valueA1, valueA2]}", actual);
-        }
+        instance.set("nameB", "valueB1");
+        OAuth2UrlEncodedFormHttpEntity copy = instance.copy();
+        assertNotSame(instance, copy);
+        assertEquals(instance, copy);
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @Test
     void equals_Object_Normal() {
-        NormalOAuth2HttpMultiValueMap instanceA = new NormalOAuth2HttpMultiValueMap(3);
-        NormalOAuth2HttpMultiValueMap instanceB = new NormalOAuth2HttpMultiValueMap(4);
+        OAuth2UrlEncodedFormHttpEntity instanceA = new OAuth2UrlEncodedFormHttpEntity(3);
+        OAuth2UrlEncodedFormHttpEntity instanceB = new OAuth2UrlEncodedFormHttpEntity(4);
         assertEquals(instanceA, instanceB);
         instanceA.set("nameA", "valueA1");
         assertNotEquals(instanceA, instanceB);
@@ -241,8 +262,8 @@ class OAuth2HttpMultiValueMapTests {
 
     @Test
     void hashCode_NoArg_Normal() {
-        NormalOAuth2HttpMultiValueMap instanceA = new NormalOAuth2HttpMultiValueMap(3);
-        NormalOAuth2HttpMultiValueMap instanceB = new NormalOAuth2HttpMultiValueMap(4);
+        OAuth2UrlEncodedFormHttpEntity instanceA = new OAuth2UrlEncodedFormHttpEntity(3);
+        OAuth2UrlEncodedFormHttpEntity instanceB = new OAuth2UrlEncodedFormHttpEntity(4);
         assertEquals(instanceA.hashCode(), instanceB.hashCode());
         instanceA.set("nameA", "valueA1");
         assertNotEquals(instanceA.hashCode(), instanceB.hashCode());
@@ -261,35 +282,6 @@ class OAuth2HttpMultiValueMapTests {
         instanceB.add("nameC", "valueC4");
         instanceB.add("nameC", "valueC3");
         assertNotEquals(instanceA.hashCode(), instanceB.hashCode());
-    }
-
-    // ##################################################################################
-
-    static class NormalOAuth2HttpMultiValueMap
-            extends OAuth2HttpMultiValueMap<NormalOAuth2HttpMultiValueMap> {
-
-        @Override
-        public @NotNull String encode(@NotNull String text) {
-            return text + "___";
-        }
-
-        @Override
-        public @NotNull NormalOAuth2HttpMultiValueMap copy() {
-            return new NormalOAuth2HttpMultiValueMap(this);
-        }
-
-        public NormalOAuth2HttpMultiValueMap() {
-            super(4);
-        }
-
-        public NormalOAuth2HttpMultiValueMap(int initialCapacity) {
-            super(initialCapacity);
-        }
-
-        protected NormalOAuth2HttpMultiValueMap(NormalOAuth2HttpMultiValueMap template) {
-            super(template);
-        }
-
     }
 
 }
