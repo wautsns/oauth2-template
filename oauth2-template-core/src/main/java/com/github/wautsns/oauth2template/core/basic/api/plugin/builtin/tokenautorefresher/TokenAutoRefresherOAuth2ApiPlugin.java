@@ -22,6 +22,7 @@ import com.github.wautsns.oauth2template.core.basic.model.OAuth2PlatformApplicat
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * OAuth2Api plugin for <em>TokenAutoRefresher</em>.
@@ -35,6 +36,7 @@ public final class TokenAutoRefresherOAuth2ApiPlugin extends OAuth2ApiPlugin {
     public boolean isApplicable(
             @NotNull OAuth2PlatformApplication platformApplication,
             boolean isApiRefreshTokenSupported, boolean isApiRevokeAuthSupported) {
+        Objects.requireNonNull(platformApplication);
         return isApiRefreshTokenSupported;
     }
 

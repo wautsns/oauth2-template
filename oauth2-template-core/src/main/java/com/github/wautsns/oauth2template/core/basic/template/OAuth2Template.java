@@ -15,6 +15,7 @@
  */
 package com.github.wautsns.oauth2template.core.basic.template;
 
+import com.github.wautsns.oauth2template.core.basic.api.basic.OAuth2Api;
 import com.github.wautsns.oauth2template.core.basic.api.basic.OAuth2ApiBuildAuthUrl;
 import com.github.wautsns.oauth2template.core.basic.api.basic.OAuth2ApiExchTokenWithCallback;
 import com.github.wautsns.oauth2template.core.basic.api.basic.OAuth2ApiExchUserWithToken;
@@ -26,6 +27,8 @@ import com.github.wautsns.oauth2template.core.basic.api.model.callback.OAuth2Cal
 import com.github.wautsns.oauth2template.core.basic.api.model.token.OAuth2Token;
 import com.github.wautsns.oauth2template.core.basic.api.model.user.OAuth2User;
 import com.github.wautsns.oauth2template.core.basic.api.plugin.basic.OAuth2ApiPlugin;
+import com.github.wautsns.oauth2template.core.basic.api.plugin.basic.interceptor.OAuth2ApiInterceptPoint;
+import com.github.wautsns.oauth2template.core.basic.api.plugin.basic.interceptor.OAuth2ApiInterceptor;
 import com.github.wautsns.oauth2template.core.basic.api.plugin.basic.invocation.OAuth2ApiInvocationFactory;
 import com.github.wautsns.oauth2template.core.basic.model.OAuth2PlatformApplication;
 import com.github.wautsns.oauth2template.core.exception.OAuth2Exception;
@@ -39,7 +42,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -93,7 +100,7 @@ public abstract class OAuth2Template<A extends OAuth2PlatformApplication, C exte
      * @throws OAuth2Exception if an OAuth2 related error occurs
      */
     public final @NotNull OAuth2Url buildAuthUrl() throws OAuth2Exception {
-        return apiBuildAuthUrl.execute(null);
+        return buildAuthUrl(null);
     }
 
     /**
@@ -272,6 +279,7 @@ public abstract class OAuth2Template<A extends OAuth2PlatformApplication, C exte
         OAuth2ApiFactory apiFactory =
                 OAuth2ApiFactoryHub.acquire(platformApplication.getPlatform().getName());
         this.callbackInitialize = rawData -> (C) apiFactory.initializeCallback(rawData);
+        // Initialize raw OAuth2Api[s].
         OAuth2ApiBuildAuthUrl apiBuildAuthUrl =
                 apiFactory.createApiBuildAuthUrl(platformApplication);
         OAuth2ApiExchTokenWithCallback<C, T> apiExchTokenWithCallback =
@@ -282,6 +290,7 @@ public abstract class OAuth2Template<A extends OAuth2PlatformApplication, C exte
                 apiFactory.createApiRefreshToken(platformApplication, httpClient);
         OAuth2ApiRevokeAuth<T> apiRevokeAuth =
                 apiFactory.createApiRevokeAuth(platformApplication, httpClient);
+        // Intercept OAuth2Api[s].
         plugins = plugins.stream()
                 .filter(plugin -> {
                     return plugin.isApplicable(
@@ -289,61 +298,116 @@ public abstract class OAuth2Template<A extends OAuth2PlatformApplication, C exte
                     );
                 })
                 .collect(Collectors.toList());
-        if (plugins.isEmpty()) {
+        Map<Class<? extends OAuth2Api<?, ?>>, List<OAuth2ApiInterceptor>> interceptorsGroupByApi =
+                groupApplicableInterceptorsByApi(plugins);
+        List<OAuth2ApiInterceptor> interceptors;
+        // ==> Intercept OAuth2ApiBuildAuthUrl.
+        interceptors = interceptorsGroupByApi.get(OAuth2ApiBuildAuthUrl.class);
+        if (interceptors == null || interceptors.isEmpty()) {
             this.apiBuildAuthUrl = apiBuildAuthUrl;
+        } else {
+            OAuth2ApiInvocationFactory factory =
+                    new OAuth2ApiInvocationFactory(
+                            platformApplication, apiBuildAuthUrl, interceptors
+                    );
+            this.apiBuildAuthUrl = context -> {
+                return (OAuth2Url) factory.create(context).proceed();
+            };
+        }
+        // ==> Intercept OAuth2ApiExchTokenWithCallback.
+        interceptors = interceptorsGroupByApi.get(OAuth2ApiExchTokenWithCallback.class);
+        if (interceptors == null || interceptors.isEmpty()) {
             this.apiExchTokenWithCallback = apiExchTokenWithCallback;
+        } else {
+            OAuth2ApiInvocationFactory factory =
+                    new OAuth2ApiInvocationFactory(
+                            platformApplication, apiExchTokenWithCallback, interceptors
+                    );
+            this.apiExchTokenWithCallback = context -> {
+                return (T) factory.create(context).proceed();
+            };
+        }
+        // ==> Intercept OAuth2ApiExchUserWithToken.
+        interceptors = interceptorsGroupByApi.get(OAuth2ApiExchUserWithToken.class);
+        if (interceptors == null || interceptors.isEmpty()) {
             this.apiExchUserWithToken = apiExchUserWithToken;
+        } else {
+            OAuth2ApiInvocationFactory factory =
+                    new OAuth2ApiInvocationFactory(
+                            platformApplication, apiExchUserWithToken, interceptors
+                    );
+            this.apiExchUserWithToken = context -> {
+                return (U) factory.create(context).proceed();
+            };
+        }
+        // ==> Intercept OAuth2ApiRefreshToken.
+        interceptors = interceptorsGroupByApi.get(OAuth2ApiRefreshToken.class);
+        if (apiRefreshToken == null || interceptors == null || interceptors.isEmpty()) {
             this.apiRefreshToken = apiRefreshToken;
+        } else {
+            OAuth2ApiInvocationFactory factory =
+                    new OAuth2ApiInvocationFactory(
+                            platformApplication, apiRefreshToken, interceptors
+                    );
+            this.apiRefreshToken = context -> {
+                return (T) factory.create(context).proceed();
+            };
+        }
+        // ==> Intercept OAuth2ApiRevokeAuth.
+        interceptors = interceptorsGroupByApi.get(OAuth2ApiRevokeAuth.class);
+        if (apiRevokeAuth == null || interceptors == null || interceptors.isEmpty()) {
             this.apiRevokeAuth = apiRevokeAuth;
         } else {
-            // OAuth2Api: BuildAuthUrl
-            OAuth2ApiInvocationFactory aifBuildAuthUrl =
-                    new OAuth2ApiInvocationFactory(platformApplication, apiBuildAuthUrl, plugins);
-            this.apiBuildAuthUrl = context -> {
-                return (OAuth2Url) aifBuildAuthUrl.create(context).proceed();
-            };
-            // OAuth2Api: ExchTokenWithCallback
-            OAuth2ApiInvocationFactory aifExchTokenWithCallback =
+            OAuth2ApiInvocationFactory factory =
                     new OAuth2ApiInvocationFactory(
-                            platformApplication, apiExchTokenWithCallback, plugins
+                            platformApplication, apiRevokeAuth, interceptors
                     );
-            this.apiExchTokenWithCallback = token -> {
-                return (T) aifExchTokenWithCallback.create(token).proceed();
+            this.apiRevokeAuth = context -> {
+                factory.create(context).proceed();
+                return null;
             };
-            // OAuth2Api: ExchUserWithToken
-            OAuth2ApiInvocationFactory aifExchUserWithToken =
-                    new OAuth2ApiInvocationFactory(
-                            platformApplication, apiExchUserWithToken, plugins
-                    );
-            this.apiExchUserWithToken = token -> {
-                return (U) aifExchUserWithToken.create(token).proceed();
-            };
-            // OAuth2Api: RefreshToken
-            if (apiRefreshToken == null) {
-                this.apiRefreshToken = null;
-            } else {
-                OAuth2ApiInvocationFactory aifRefreshToken =
-                        new OAuth2ApiInvocationFactory(
-                                platformApplication, apiRefreshToken, plugins
-                        );
-                this.apiRefreshToken = token -> {
-                    return (T) aifRefreshToken.create(token).proceed();
-                };
-            }
-            // OAuth2Api: RevokeAuth
-            if (apiRevokeAuth == null) {
-                this.apiRevokeAuth = null;
-            } else {
-                OAuth2ApiInvocationFactory aifRevokeAuth =
-                        new OAuth2ApiInvocationFactory(
-                                platformApplication, apiRevokeAuth, plugins
-                        );
-                this.apiRevokeAuth = token -> {
-                    aifRevokeAuth.create(token).proceed();
-                    return null;
-                };
-            }
         }
+    }
+
+    /**
+     * Group applicable interceptors by OAuth2Api.
+     *
+     * @param plugins plugins
+     * @return applicable interceptors by OAuth2Api
+     */
+    private static @NotNull Map<@NotNull Class<? extends OAuth2Api<?, ?>>, @NotNull List<@NotNull OAuth2ApiInterceptor>> groupApplicableInterceptorsByApi(
+            @NotNull List<@NotNull OAuth2ApiPlugin> plugins) {
+        if (plugins.isEmpty()) {return new HashMap<>(0);}
+        Map<Class<? extends OAuth2Api<?, ?>>, List<OAuth2ApiInterceptPoint>> temp = new HashMap<>();
+        Map<OAuth2ApiInterceptPoint, OAuth2ApiInterceptor> pointToInterceptor = new HashMap<>();
+        plugins.stream()
+                .flatMap(plugin -> plugin.getInterceptors().stream())
+                .forEach(interceptor -> {
+                    interceptor.getInterceptPoints().forEach(point -> {
+                        OAuth2ApiInterceptor previous = pointToInterceptor.put(point, interceptor);
+                        if (previous != null) {
+                            throw new IllegalArgumentException(String.format(
+                                    "InterceptorPoint should not be reused." +
+                                            " interceptorA:`%s`,interceptorB:`%s`",
+                                    previous.getClass(), interceptor.getClass()
+                            ));
+                        }
+                        temp.computeIfAbsent(point.getTarget(), k -> new LinkedList<>())
+                                .add(point);
+                    });
+                });
+        temp.values().forEach(points -> {
+            points.sort(Comparator.comparingInt(OAuth2ApiInterceptPoint::getOrder));
+        });
+        Map<Class<? extends OAuth2Api<?, ?>>, List<OAuth2ApiInterceptor>> result = new HashMap<>();
+        temp.forEach((api, points) -> {
+            List<OAuth2ApiInterceptor> interceptors = points.stream()
+                    .map(pointToInterceptor::get)
+                    .distinct()
+                    .collect(Collectors.toList());
+            result.put(api, interceptors);
+        });
+        return result;
     }
 
 }

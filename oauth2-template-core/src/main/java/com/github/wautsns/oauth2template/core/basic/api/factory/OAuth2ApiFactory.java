@@ -59,8 +59,7 @@ public abstract class OAuth2ApiFactory<A extends OAuth2PlatformApplication, C ex
      * @param applicationName an application name
      * @return a new platform application
      */
-    public abstract @NotNull OAuth2PlatformApplication initializePlatformApplication(
-            @NotNull String applicationName);
+    public abstract @NotNull A initializePlatformApplication(@NotNull String applicationName);
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

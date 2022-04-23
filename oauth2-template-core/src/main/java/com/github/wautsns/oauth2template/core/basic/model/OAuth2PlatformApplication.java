@@ -18,11 +18,10 @@ package com.github.wautsns.oauth2template.core.basic.model;
 import com.github.wautsns.oauth2template.core.basic.model.application.OAuth2Application;
 import com.github.wautsns.oauth2template.core.basic.model.application.OAuth2ApplicationHub;
 import com.github.wautsns.oauth2template.core.basic.model.platform.OAuth2Platform;
+import com.github.wautsns.oauth2template.core.basic.model.platform.OAuth2PlatformHub;
 import com.github.wautsns.oauth2template.core.utility.ctx.OAuth2Context;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
 
 /**
  * Abstract OAuth2 platform application.
@@ -51,15 +50,14 @@ public abstract class OAuth2PlatformApplication {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     /**
-     * Construct a new instance for the given application name and platform name.
+     * Construct a new instance for the given platform and application.
      *
-     * @param platform a platform
+     * @param platformName a platform name
      * @param applicationName an application name
-     * @see OAuth2ApplicationHub.Manipulation#registerIfAbsent(String)
      */
     protected OAuth2PlatformApplication(
-            @NotNull OAuth2Platform platform, @NotNull String applicationName) {
-        this.platform = Objects.requireNonNull(platform);
+            @NotNull String platformName, @NotNull String applicationName) {
+        this.platform = OAuth2PlatformHub.acquire(platformName);
         this.application = OAuth2ApplicationHub.Manipulation.registerIfAbsent(applicationName);
         this.context = OAuth2Context.concurrentHashMap();
     }
@@ -82,11 +80,15 @@ public abstract class OAuth2PlatformApplication {
 
     @Override
     public final boolean equals(Object obj) {
+        // Class `OAuth2PlatformApplicationHub` relies on the implementation of the `hashCode` and
+        // `equals`, add `final` modifier to avoid being overload.
         return super.equals(obj);
     }
 
     @Override
     public final int hashCode() {
+        // Class `OAuth2PlatformApplicationHub` relies on the implementation of the `hashCode` and
+        // `equals`, add `final` modifier to avoid being overload.
         return super.hashCode();
     }
 

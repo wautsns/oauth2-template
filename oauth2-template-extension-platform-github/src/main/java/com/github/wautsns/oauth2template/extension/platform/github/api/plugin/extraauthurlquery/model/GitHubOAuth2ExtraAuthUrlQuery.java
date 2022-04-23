@@ -30,7 +30,8 @@ import java.util.stream.Collectors;
  * GitHub OAuth2 auth url query properties.
  *
  * @author wautsns
- * @see <a href="https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps">
+ * @see <a
+ *         href="https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps">
  *         Authorizing OAuth Apps - GitHub Docs</a>
  * @since {{{SINCE_PLACEHOLDER}}}
  */

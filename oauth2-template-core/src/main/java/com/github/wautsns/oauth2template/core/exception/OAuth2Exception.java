@@ -32,8 +32,8 @@ public class OAuth2Exception extends Exception {
     /**
      * Construct a new instance.
      *
-     * @param message the detail message which is saved for later retrieval by the {@link
-     *         #getMessage()} method
+     * @param message the detail message which is saved for later retrieval by the
+     *         {@link #getMessage()} method
      */
     public OAuth2Exception(@Nullable String message) {
         super(message);
@@ -54,8 +54,8 @@ public class OAuth2Exception extends Exception {
      *
      * @param cause the cause which is saved for later retrieval by the {@link #getCause()}
      *         method
-     * @param message the detail message which is saved for later retrieval by the {@link
-     *         #getMessage()} method
+     * @param message the detail message which is saved for later retrieval by the
+     *         {@link #getMessage()} method
      */
     public OAuth2Exception(@Nullable Throwable cause, @Nullable String message) {
         super(message, cause);

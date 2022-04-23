@@ -16,7 +16,6 @@
 package com.github.wautsns.oauth2template.core.basic.api.plugin.basic.invocation;
 
 import com.github.wautsns.oauth2template.core.basic.api.basic.OAuth2Api;
-import com.github.wautsns.oauth2template.core.basic.api.plugin.basic.OAuth2ApiPlugin;
 import com.github.wautsns.oauth2template.core.basic.api.plugin.basic.interceptor.OAuth2ApiInterceptPoint;
 import com.github.wautsns.oauth2template.core.basic.api.plugin.basic.interceptor.OAuth2ApiInterceptor;
 import com.github.wautsns.oauth2template.core.basic.model.OAuth2PlatformApplication;
@@ -24,14 +23,10 @@ import com.github.wautsns.oauth2template.core.basic.model.OAuth2PlatformApplicat
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * OAuth2Api invocation factory.
@@ -67,30 +62,22 @@ public final class OAuth2ApiInvocationFactory {
     /**
      * Construct a new instance.
      *
+     * <ul>
+     * <li style="list-style-type:none">########## Notes ###############</li>
+     * <li>This constructor does not verify that the interceptors are valid.</li>
+     * </ul>
+     *
      * @param platformApplication a platform application
      * @param api an OAuth2Api
-     * @param plugins plugins
+     * @param interceptors interceptors applicable to the given OAuth2Api, sorted by
+     *         {@link OAuth2ApiInterceptPoint#getOrder() order}
      */
     public OAuth2ApiInvocationFactory(
             @NotNull OAuth2PlatformApplication platformApplication,
             @NotNull OAuth2Api<?, ?> api,
-            @NotNull List<@NotNull OAuth2ApiPlugin> plugins) {
+            @NotNull List<@NotNull OAuth2ApiInterceptor> interceptors) {
         this.platformApplication = Objects.requireNonNull(platformApplication);
         this.api = Objects.requireNonNull(api);
-        Objects.requireNonNull(plugins);
-        Map<OAuth2ApiInterceptor, OAuth2ApiInterceptPoint> points = new HashMap<>();
-        plugins.stream()
-                .flatMap(plugin -> plugin.getInterceptors().stream())
-                .forEach(interceptor -> {
-                    interceptor.getInterceptPoints().stream()
-                            .filter(point -> point.getTarget().isInstance(api))
-                            .findFirst()
-                            .ifPresent(point -> points.put(interceptor, point));
-                });
-        List<OAuth2ApiInterceptor> interceptors = points.entrySet().stream()
-                .sorted(Comparator.comparingInt(entry -> entry.getValue().getOrder()))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
         this.interceptorIteratorSupplier = interceptors::iterator;
     }
 

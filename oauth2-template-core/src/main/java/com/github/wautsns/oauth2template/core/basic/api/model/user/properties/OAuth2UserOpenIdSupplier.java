@@ -15,6 +15,8 @@
  */
 package com.github.wautsns.oauth2template.core.basic.api.model.user.properties;
 
+import org.jetbrains.annotations.UnknownNullability;
+
 /**
  * OAuth2 user property supplier for <em>openId</em>.
  *
@@ -28,6 +30,6 @@ public interface OAuth2UserOpenIdSupplier {
      *
      * @return open id
      */
-    String getOpenId();
+    @UnknownNullability String getOpenId();
 
 }

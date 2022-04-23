@@ -100,7 +100,7 @@ public final class OAuth2HttpClientFactoryHub {
             return STORAGE.values().stream()
                     .findAny()
                     .orElseThrow(() -> {
-                        return new IllegalStateException(
+                        return new IllegalArgumentException(
                                 "No OAuth2HttpClientFactory instance is available."
                         );
                     })
@@ -108,7 +108,7 @@ public final class OAuth2HttpClientFactoryHub {
         } else {
             OAuth2HttpClientFactory instance = STORAGE.get(implementation);
             if (instance == null) {
-                throw new IllegalStateException(String.format(
+                throw new IllegalArgumentException(String.format(
                         "No OAuth2HttpClientFactory instance can create `%s`.",
                         properties.getImplementation()
                 ));

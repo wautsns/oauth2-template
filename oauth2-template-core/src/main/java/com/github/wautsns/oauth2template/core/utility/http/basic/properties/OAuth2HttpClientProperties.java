@@ -129,8 +129,14 @@ public final class OAuth2HttpClientProperties {
      *
      * <ul>
      * <li style="list-style-type:none">########## Notes ###############</li>
-     * <li>For property <em>custom</em>, copy it through <code>{@link
-     * Properties#Properties(Properties) new Properties}(<i>this</i>.custom)</code>.</li>
+     * <li>For property <em>custom</em>, copy it through <pre>
+     *    this.custom = new Properties(DEFAULTS.custom);
+     *    if (template != DEFAULTS) {
+     *        for (String name : template.getCustom().stringPropertyNames()) {
+     *            this.custom.put(name, template.getCustom().getProperty(name));
+     *        }
+     *    }
+     * </pre></li>
      * </ul>
      *
      * @param template a template for deep copy, or {@code null} just for simple
@@ -156,7 +162,12 @@ public final class OAuth2HttpClientProperties {
                 this.proxy.setUsername(template.proxy.getUsername());
                 this.proxy.setPassword(template.proxy.getPassword());
             }
-            this.custom = new Properties(template.custom);
+            this.custom = new Properties(DEFAULTS.custom);
+            if (template != DEFAULTS) {
+                for (String name : template.getCustom().stringPropertyNames()) {
+                    this.custom.put(name, template.getCustom().getProperty(name));
+                }
+            }
         }
     }
 

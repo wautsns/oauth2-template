@@ -40,8 +40,8 @@ public final class OAuth2UserDeniedAuthorizationException extends OAuth2Exceptio
     /**
      * Construct a new instance.
      *
-     * @param message the detail message which is saved for later retrieval by the {@link
-     *         #getMessage()} method
+     * @param message the detail message which is saved for later retrieval by the
+     *         {@link #getMessage()} method
      */
     public OAuth2UserDeniedAuthorizationException(@Nullable String message) {
         super(message);

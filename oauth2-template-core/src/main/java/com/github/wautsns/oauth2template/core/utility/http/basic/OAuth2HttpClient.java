@@ -122,7 +122,8 @@ public abstract class OAuth2HttpClient {
      *         <li>Add headers through <code><i>headers</i>.{@link
      *         OAuth2HttpHeaders#forEach(BiConsumer) forEach(<i>action</i>)}</code>.</li>
      *         <li>If the entity is not {@code null}, add it through {@link
-     *         OAuth2HttpEntity#getContentType()} and {@link OAuth2HttpEntity#getBodyString()}.</li>
+     *         OAuth2HttpEntity#getContentType()} and
+     *         {@link OAuth2HttpEntity#getBodyString()}.</li>
      *         </ul>
      */
     protected abstract @NotNull OAuth2HttpResponse execute(

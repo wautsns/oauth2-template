@@ -57,8 +57,8 @@ public abstract class OAuth2DataReceived {
      * Return the value associated with the given name.
      *
      * @param name a name
-     * @return the value associated with the name, or {@code null} if the json node is {@link
-     *         MissingNode} or {@link NullNode}
+     * @return the value associated with the name, or {@code null} if the json node is
+     *         {@link MissingNode} or {@link NullNode}
      */
     public final @Nullable Boolean getBoolean(@NotNull String name) {
         return getValue(name, JsonNode::asBoolean);
@@ -68,8 +68,8 @@ public abstract class OAuth2DataReceived {
      * Return the value associated with the given name.
      *
      * @param name a name
-     * @return the value associated with the name, or {@code null} if the json node is {@link
-     *         MissingNode} or {@link NullNode}
+     * @return the value associated with the name, or {@code null} if the json node is
+     *         {@link MissingNode} or {@link NullNode}
      */
     public final @Nullable Long getLong(@NotNull String name) {
         return getValue(name, JsonNode::asLong);
@@ -79,8 +79,8 @@ public abstract class OAuth2DataReceived {
      * Return the value associated with the given name.
      *
      * @param name a name
-     * @return the value associated with the name, or {@code null} if the json node is {@link
-     *         MissingNode} or {@link NullNode}
+     * @return the value associated with the name, or {@code null} if the json node is
+     *         {@link MissingNode} or {@link NullNode}
      */
     public final @Nullable String getString(@NotNull String name) {
         return getValue(name, JsonNode::asText);
@@ -94,8 +94,8 @@ public abstract class OAuth2DataReceived {
      * @param name a name
      * @param convertor a convertor for the json node associated with the name
      * @param <T> the type of value to be returned
-     * @return the value associated with the name, or {@code null} if the json node is {@link
-     *         MissingNode} or {@link NullNode} or the convertor returned {@code null}
+     * @return the value associated with the name, or {@code null} if the json node is
+     *         {@link MissingNode} or {@link NullNode} or the convertor returned {@code null}
      */
     protected final <T> @Nullable T getValue(
             @NotNull String name, @NotNull Function<@NotNull JsonNode, @Nullable T> convertor) {

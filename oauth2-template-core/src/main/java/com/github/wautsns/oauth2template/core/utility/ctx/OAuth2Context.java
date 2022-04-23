@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * An OAuth2 context.
+ * OAuth2 context.
  *
  * @author wautsns
  * @since {{{SINCE_PLACEHOLDER}}}

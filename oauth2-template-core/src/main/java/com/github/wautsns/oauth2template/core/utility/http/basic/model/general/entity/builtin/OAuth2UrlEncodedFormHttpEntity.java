@@ -24,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
@@ -88,7 +87,6 @@ public final class OAuth2UrlEncodedFormHttpEntity
      * @return the value associated with the name, or {@code null} if not exist
      */
     public @Nullable String get(@NotNull String name) {
-        Objects.requireNonNull(name);
         return storage.get(name);
     }
 

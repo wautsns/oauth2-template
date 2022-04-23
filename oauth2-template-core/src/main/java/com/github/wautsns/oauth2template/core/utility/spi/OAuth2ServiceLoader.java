@@ -89,8 +89,8 @@ public final class OAuth2ServiceLoader<S> implements Iterable<S> {
     // ##################################################################################
 
     /**
-     * Create a new service loader for the given service, using the current thread's {@linkplain
-     * Thread#getContextClassLoader context class loader} as loader.
+     * Create a new service loader for the given service, using the current thread's
+     * {@linkplain Thread#getContextClassLoader context class loader} as loader.
      *
      * @param <S> the type of the service to be loaded
      * @param service a class representing the service to be loaded
@@ -354,8 +354,8 @@ public final class OAuth2ServiceLoader<S> implements Iterable<S> {
      * @param url the URL of the configuration file being read
      * @param lineNumber current line number
      * @param providerNames a provider class name list
-     * @return {@code true} if the end of the configuration file is not reached, otherwise {@code
-     *         false}
+     * @return {@code true} if the end of the configuration file is not reached, otherwise
+     *         {@code false}
      * @throws IOException if an I/O error occurs on reading
      * @throws ServiceConfigurationError if a configuration format error is detected
      */

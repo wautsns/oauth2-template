@@ -35,21 +35,29 @@ import java.util.Objects;
 public final class ExtraAuthUrlQueryOAuth2ApiPlugin extends OAuth2ApiPlugin {
 
     /** OAuth2 context variable: identifier. */
-    private static final @NotNull String VARIABLE_IDENTIFIER = String.format(
-            "%s_identifier",
-            ExtraAuthUrlQueryOAuth2ApiPlugin.class
-    );
+    private static final @NotNull String VARIABLE_IDENTIFIER =
+            String.format("%s#identifier", ExtraAuthUrlQueryOAuth2ApiPlugin.class);
+
+    // ##################################################################################
 
     /**
      * Associate the given value with variable: identifier.
+     *
+     * <ul>
+     * <li style="list-style-type:none">########## Notes ###############</li>
+     * <li>If the identifier is {@code null}, the variable will be removed.</li>
+     * </ul>
      *
      * @param context an OAuth2 context
      * @param identifier a variable value associated with the identifier
      */
     public static void setVariableIdentifier(
-            @NotNull OAuth2Context context, @NotNull String identifier) {
-        Objects.requireNonNull(identifier);
-        context.put(VARIABLE_IDENTIFIER, identifier);
+            @NotNull OAuth2Context context, @Nullable String identifier) {
+        if (identifier == null) {
+            context.remove(VARIABLE_IDENTIFIER);
+        } else {
+            context.put(VARIABLE_IDENTIFIER, identifier);
+        }
     }
 
     /**
@@ -68,6 +76,7 @@ public final class ExtraAuthUrlQueryOAuth2ApiPlugin extends OAuth2ApiPlugin {
     public boolean isApplicable(
             @NotNull OAuth2PlatformApplication platformApplication,
             boolean isApiRefreshTokenSupported, boolean isApiRevokeAuthSupported) {
+        Objects.requireNonNull(platformApplication);
         return true;
     }
 

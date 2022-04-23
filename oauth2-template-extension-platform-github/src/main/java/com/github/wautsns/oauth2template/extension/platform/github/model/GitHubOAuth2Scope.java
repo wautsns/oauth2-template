@@ -155,14 +155,16 @@ public enum GitHubOAuth2Scope {
 
     /**
      * Grants access to upload or publish a package in GitHub Packages. For more information, see
-     * "<a href="https://docs.github.com/en/github/managing-packages-with-github-packages/publishing-a-package">
+     * "<a
+     * href="https://docs.github.com/en/github/managing-packages-with-github-packages/publishing-a-package">
      * Publishing a package</a>".
      */
     WRITE_PACKAGES("write:packages"),
 
     /**
      * Grants access to download or install packages from GitHub Packages. For more information, see
-     * "<a href="https://docs.github.com/en/github/managing-packages-with-github-packages/installing-a-package">
+     * "<a
+     * href="https://docs.github.com/en/github/managing-packages-with-github-packages/installing-a-package">
      * Installing a package</a>".
      */
     READ_PACKAGES("read:packages"),
@@ -187,7 +189,8 @@ public enum GitHubOAuth2Scope {
      * Grants the ability to add and update GitHub Actions workflow files. Workflow files can be
      * committed without this scope if the same file (with both the same path and contents) exists
      * on another branch in the same repository. Workflow files can expose <code>GITHUB_TOKEN</code>
-     * which may have a different set of scopes, see <a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/authentication-in-a-workflow#permissions-for-the-github_token">
+     * which may have a different set of scopes, see <a
+     * href="https://docs.github.com/en/free-pro-team@latest/actions/reference/authentication-in-a-workflow#permissions-for-the-github_token">
      * https://docs.github.com/en/free-pro-team@latest/actions/reference/authentication-in-a-workflow#permissions-for-the-github_token</a>
      * for details.
      */
